@@ -16,6 +16,7 @@ public class PlayerMovement : MonoBehaviour
     private float horizontal = 0;
     private float vertical = 0;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private Transform groundChecker;
 
     //States
     private bool isJumping = false;
@@ -36,10 +37,12 @@ public class PlayerMovement : MonoBehaviour
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
 
-        bool isGrounded = Physics.Raycast(transform.position, Vector3.down, .2f, groundLayer);
+        bool isGrounded = Physics.Raycast(groundChecker.position, Vector3.down, .2f, groundLayer);
 
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
             isJumping = true;
+
+        //Check if player is walking
         if (Input.GetKey(KeyCode.LeftShift))
             isWalking = true;
         else

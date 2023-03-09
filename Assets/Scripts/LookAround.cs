@@ -21,8 +21,8 @@ public class LookAround : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float mouseX = Input.GetAxis("Mouse X");
-        float mouseY = Input.GetAxis("Mouse Y");
+        float mouseX = Input.GetAxis("Mouse X") * xSensitivity * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * ySensitivity * Time.deltaTime;
 
         xRotation -= mouseY;
 
