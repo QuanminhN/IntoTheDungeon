@@ -6,6 +6,8 @@ public class LookAround : MonoBehaviour
 {
     [SerializeField] Camera cam;
     [SerializeField] private Transform player;
+    public Transform weapon;
+
 
     [SerializeField] private float xSensitivity = 100f;
     [SerializeField] private float ySensitivity = 100f;
@@ -29,6 +31,7 @@ public class LookAround : MonoBehaviour
         xRotation = Mathf.Clamp(xRotation, -maxAngle, maxAngle);
 
         cam.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        weapon.localRotation = cam.transform.localRotation;
         transform.Rotate(Vector3.up * mouseX);
 
         if (Input.GetKeyDown(KeyCode.Escape))
