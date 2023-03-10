@@ -7,6 +7,7 @@ public class PlayerMovement : MonoBehaviour
     #region Variables
     //Components
     private Rigidbody rb;
+    public Transform weaponParent;
 
     //Movement Values
     [SerializeField] private float runSpeed = 300f;
@@ -19,6 +20,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform groundChecker;
 
+    private Vector3 weaponParentOrigin;
+    private Vector3 targetWeaponBobPos;
+
+    private float movementCounter;
+    private float idleCounter;
+
     //States
     private bool isJumping = false;
     private bool isWalking = false;
@@ -28,8 +35,8 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //Grab Rigidbody from the object
         rb = GetComponent<Rigidbody>();
+        weaponParentOrigin = weaponParent.localPosition;
 
         //Turn of main camera
         Camera.main.enabled = false;
@@ -51,6 +58,27 @@ public class PlayerMovement : MonoBehaviour
             isWalking = true;
         else
             isWalking = false;
+
+        if (horizontal == 0 && vertical == 0) //Idle
+        {
+            HeadBob(idleCounter, .025f, .025f);
+            idleCounter += Time.deltaTime;
+            weaponParent.localPosition = Vector3.Lerp(weaponParent.localPosition, targetWeaponBobPos, Time.deltaTime * 2f);
+        }
+        else if (isWalking)
+        {
+            HeadBob(movementCounter, .05f, .05f);
+            movementCounter += Time.deltaTime * 3f;
+            weaponParent.localPosition = Vector3.Lerp(weaponParent.localPosition, targetWeaponBobPos, Time.deltaTime * 4f);
+        }
+        else
+        {
+            HeadBob(movementCounter, .05f, .05f);
+            movementCounter += Time.deltaTime * 5f;
+            weaponParent.localPosition = Vector3.Lerp(weaponParent.localPosition, targetWeaponBobPos, Time.deltaTime * 6f);
+        }
+        
+            
     }
 
     // Update is called once per frame
@@ -73,6 +101,13 @@ public class PlayerMovement : MonoBehaviour
         t_speed.y = rb.velocity.y;
         rb.velocity = t_speed;
         
+    }
+    #endregion
+
+    #region Private Methods
+    void HeadBob(float px, float pxIntensity, float pyIntensity)
+    {
+        targetWeaponBobPos = weaponParentOrigin + new Vector3(Mathf.Cos(px) * pxIntensity, Mathf.Sin(px * 2) * pyIntensity, 0);
     }
     #endregion
 }

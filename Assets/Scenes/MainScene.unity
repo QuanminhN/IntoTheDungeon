@@ -451,6 +451,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e6266542eb59400f8072c602931b592, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  weaponParent: {fileID: 1143337220}
   runSpeed: 300
   walkSpeed: 100
   jumpForce: 150
