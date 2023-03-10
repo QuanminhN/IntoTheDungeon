@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    #region Variables
     //Components
     private Rigidbody rb;
 
@@ -21,6 +22,9 @@ public class PlayerMovement : MonoBehaviour
     //States
     private bool isJumping = false;
     private bool isWalking = false;
+    #endregion
+
+    #region Monobehavior Callbacks
     // Start is called before the first frame update
     void Start()
     {
@@ -70,4 +74,5 @@ public class PlayerMovement : MonoBehaviour
         rb.velocity = t_speed;
         
     }
+    #endregion
 }

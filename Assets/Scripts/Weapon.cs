@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
+    #region Variables
     public Gun[] loadout;
     public Transform weaponParent;
 
     private GameObject currentEquip;
+    #endregion
 
+    #region Monobehavior callbacks
     // Start is called before the first frame update
     void Start()
     {
@@ -20,7 +23,9 @@ public class Weapon : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Alpha1)) Equip(0);
     }
+    #endregion
 
+    #region Private Methods
     void Equip(int i)
     {
         //This will destroy weapson if player already have a weapon equiped
@@ -32,4 +37,5 @@ public class Weapon : MonoBehaviour
 
         currentEquip = t_newEquipment;
     }
+    #endregion
 }

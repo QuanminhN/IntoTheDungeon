@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class LookAround : MonoBehaviour
 {
+
+    #region Variables
     [SerializeField] Camera cam;
     [SerializeField] private Transform player;
     public Transform weapon;
@@ -13,7 +15,9 @@ public class LookAround : MonoBehaviour
     [SerializeField] private float ySensitivity = 100f;
     [SerializeField] private float maxAngle = 90f;
     private float xRotation;
+    #endregion
 
+    #region MonoBehavior Callbacks
     // Start is called before the first frame update
     void Start()
     {
@@ -39,7 +43,9 @@ public class LookAround : MonoBehaviour
             updateCursorState();
         }
     }
+    #endregion
 
+    #region Private methods
     void updateCursorState()
     {
         Cursor.visible = !Cursor.visible;
@@ -47,7 +53,8 @@ public class LookAround : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
         else
             Cursor.lockState = CursorLockMode.None;
-        
+
     }
+    #endregion
 
 }
