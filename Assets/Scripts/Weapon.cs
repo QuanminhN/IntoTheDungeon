@@ -10,6 +10,9 @@ public class Weapon : MonoBehaviour
 
     private int currentIndex;
     private GameObject currentEquip;
+
+    public GameObject bulletHolePrefab;
+    public LayerMask canBeShot;
     #endregion
 
     #region Monobehavior callbacks
@@ -23,7 +26,16 @@ public class Weapon : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1)) Equip(0);
-        Aim(Input.GetMouseButton(1));
+        if(currentEquip != null)
+        {
+            Aim(Input.GetMouseButton(1));
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                Shoot();
+            }
+        }
+        
     }
     #endregion
 
@@ -44,7 +56,6 @@ public class Weapon : MonoBehaviour
 
     void Aim(bool isAiming)
     {
-        if (currentEquip == null) return;
 
         Transform t_anchor = currentEquip.transform.Find("Anchor");
         Transform t_AdsState = currentEquip.transform.Find("States/ADS");
@@ -62,6 +73,20 @@ public class Weapon : MonoBehaviour
             t_anchor.position = Vector3.Lerp(t_anchor.position, t_HipState.position, loadout[currentIndex].aimSpeed * Time.deltaTime);
         }
 
+    }
+
+    void Shoot()
+    {
+        Transform t_spawn = transform.Find("Cameras/Player Camera");
+
+        RaycastHit t_hit = new RaycastHit();
+        if(Physics.Raycast(t_spawn.position, t_spawn.forward, out t_hit, 1000f, canBeShot)) //start from camera, ahead of camera, distance of raycast, and layermask of what can be shot
+        {
+            //Create bullethole object where it is hit and slightly off the wall
+            GameObject t_newBulletHole = Instantiate(bulletHolePrefab, t_hit.point + t_hit.normal * .001f, Quaternion.identity) as GameObject;
+            t_newBulletHole.transform.LookAt(t_hit.point + t_hit.normal);
+            Destroy(t_newBulletHole, 5f); //Destory in 5 seconds
+        }
     }
     #endregion
 }

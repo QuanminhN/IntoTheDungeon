@@ -132,7 +132,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 143228416}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -199,7 +199,7 @@ GameObject:
   - component: {fileID: 491256198}
   - component: {fileID: 491256201}
   - component: {fileID: 491256200}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Eyes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -282,7 +282,7 @@ GameObject:
   - component: {fileID: 531622945}
   - component: {fileID: 531622947}
   - component: {fileID: 531622946}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Player Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -364,7 +364,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 719553211}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Misc
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -396,7 +396,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 772425173}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -432,7 +432,7 @@ GameObject:
   - component: {fileID: 779650668}
   - component: {fileID: 779650672}
   - component: {fileID: 779650673}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -540,6 +540,10 @@ MonoBehaviour:
   loadout:
   - {fileID: 11400000, guid: 01af4a0937af1e446b07116375776848, type: 2}
   weaponParent: {fileID: 1143337220}
+  bulletHolePrefab: {fileID: 784202778959656706, guid: 1dacb3a891e681d4f91e34b46d2e4080, type: 3}
+  canBeShot:
+    serializedVersion: 2
+    m_Bits: 119
 --- !u!1 &942526405
 GameObject:
   m_ObjectHideFlags: 0
@@ -978,7 +982,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1143337220}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Weapon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1011,7 +1015,7 @@ GameObject:
   - component: {fileID: 1354073835}
   - component: {fileID: 1354073837}
   - component: {fileID: 1354073836}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1092,7 +1096,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1954813792}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Cameras
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1124,7 +1128,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1979858744}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Design
   m_TagString: Untagged
   m_Icon: {fileID: 0}

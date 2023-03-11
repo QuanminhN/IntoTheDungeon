@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4701176601534889970}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ADS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41,7 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4701176601565600643}
   - component: {fileID: 2391962899601241915}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Pistol
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -88,7 +88,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4701176601580244202}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Anchor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -121,7 +121,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4701176601619693466}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Resources
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -155,7 +155,7 @@ GameObject:
   - component: {fileID: 4701176601645445761}
   - component: {fileID: 4701176601645445774}
   - component: {fileID: 4701176601645445775}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Reciever
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -249,7 +249,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4701176602404823322}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Hip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -280,7 +280,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4701176602679536977}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Design
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -316,7 +316,7 @@ GameObject:
   - component: {fileID: 4701176602978804509}
   - component: {fileID: 4701176602978804506}
   - component: {fileID: 4701176602978804507}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Handle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -410,7 +410,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4701176603172339769}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: States
   m_TagString: Untagged
   m_Icon: {fileID: 0}
