@@ -13,6 +13,8 @@ public class Weapon : MonoBehaviour
 
     public GameObject bulletHolePrefab;
     public LayerMask canBeShot;
+
+    private float shotCoolDown;
     #endregion
 
     #region Monobehavior callbacks
@@ -30,10 +32,15 @@ public class Weapon : MonoBehaviour
         {
             Aim(Input.GetMouseButton(1));
 
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) && shotCoolDown <= 0)
             {
                 Shoot();
             }
+
+            //weapon position elasticity
+            currentEquip.transform.localPosition = Vector3.Lerp(currentEquip.transform.localPosition, Vector3.zero, Time.deltaTime * 4f);
+
+            shotCoolDown -= Time.deltaTime;
         }
         
     }
@@ -45,9 +52,12 @@ public class Weapon : MonoBehaviour
         //This will destroy weapson if player already have a weapon equiped
         if (currentEquip != null) Destroy(currentEquip);
 
+        
+
         currentIndex = i;
 
         GameObject t_newEquipment = Instantiate(loadout[i].prefab, weaponParent.position, weaponParent.rotation, weaponParent) as GameObject;
+        t_newEquipment.GetComponent<Rigidbody>().isKinematic = true;
         t_newEquipment.transform.localPosition = Vector3.zero;
         t_newEquipment.transform.localEulerAngles = Vector3.zero;
 
@@ -79,14 +89,29 @@ public class Weapon : MonoBehaviour
     {
         Transform t_spawn = transform.Find("Cameras/Player Camera");
 
+        //Bloom
+        Vector3 t_bloom = t_spawn.position + t_spawn.forward * 1000f;
+        t_bloom += Random.Range(-loadout[currentIndex].bloom, loadout[currentIndex].bloom) * t_spawn.up;
+        t_bloom += Random.Range(-loadout[currentIndex].bloom, loadout[currentIndex].bloom) * t_spawn.right;
+        t_bloom -= t_spawn.position;
+        t_bloom.Normalize();
+
+        //Raycast
         RaycastHit t_hit = new RaycastHit();
-        if(Physics.Raycast(t_spawn.position, t_spawn.forward, out t_hit, 1000f, canBeShot)) //start from camera, ahead of camera, distance of raycast, and layermask of what can be shot
+        if(Physics.Raycast(t_spawn.position, t_bloom, out t_hit, 1000f, canBeShot)) //start from camera, ahead of camera, distance of raycast, and layermask of what can be shot
         {
             //Create bullethole object where it is hit and slightly off the wall
             GameObject t_newBulletHole = Instantiate(bulletHolePrefab, t_hit.point + t_hit.normal * .001f, Quaternion.identity) as GameObject;
             t_newBulletHole.transform.LookAt(t_hit.point + t_hit.normal);
             Destroy(t_newBulletHole, 5f); //Destory in 5 seconds
         }
+
+        //gun fx
+        currentEquip.transform.Rotate(-loadout[currentIndex].recoil, 0, 0);
+        currentEquip.transform.position -= currentEquip.transform.forward * loadout[currentIndex].kickback;
+
+        //Set shooting cooldown
+        shotCoolDown = loadout[currentIndex].fireRate;
     }
     #endregion
 }

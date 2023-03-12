@@ -10,4 +10,8 @@ public class Gun : ScriptableObject
     public GameObject prefab;
 
     public float aimSpeed;
+
+    public float bloom; // accuracy
+    public float recoil;
+    public float kickback;
 }
