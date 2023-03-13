@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
-public class LookAround : MonoBehaviour
+public class LookAround : MonoBehaviourPunCallbacks
 {
 
     #region Variables
@@ -27,6 +28,7 @@ public class LookAround : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!photonView.IsMine) return;
         float mouseX = Input.GetAxis("Mouse X") * xSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * ySensitivity * Time.deltaTime;
 

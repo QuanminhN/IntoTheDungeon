@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
-public class Sway : MonoBehaviour
+public class Sway : MonoBehaviourPunCallbacks
 {
     #region Variables
     public float swayIntensity;
@@ -21,6 +22,7 @@ public class Sway : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!photonView.IsMine) return;
         updateSway();
     }
     #endregion

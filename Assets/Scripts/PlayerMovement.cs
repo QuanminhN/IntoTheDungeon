@@ -1,13 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : MonoBehaviourPunCallbacks
 {
     #region Variables
     //Components
     private Rigidbody rb;
     public Transform weaponParent;
+    public GameObject cameraParent;
 
     //Movement Values
     [SerializeField] private float runSpeed = 300f;
@@ -35,15 +37,26 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //Change layer if character is not the player
+        if (!photonView.IsMine)
+        {
+            gameObject.layer = 9;
+        }
         rb = GetComponent<Rigidbody>();
         weaponParentOrigin = weaponParent.localPosition;
 
-        //Turn of main camera
-        Camera.main.enabled = false;
+        //Turn off main camera
+        if(Camera.main)
+            Camera.main.enabled = false;
+
+        //See if it is the correct camera
+        cameraParent.SetActive(photonView.IsMine);
     }
 
     void Update()
     {
+        if (!photonView.IsMine) return; //If the view does not belong to the player you can move them
+
         //Get the inputs for vertical and horizontal
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
@@ -84,6 +97,8 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (!photonView.IsMine) return; //If the view does not belong to the player you can move them
+
         float speed = runSpeed;
 
         Vector3 t_move = new Vector3(horizontal, 0, vertical);

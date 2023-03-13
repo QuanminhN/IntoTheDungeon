@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
-public class Weapon : MonoBehaviour
+public class Weapon : MonoBehaviourPunCallbacks
 {
     #region Variables
     public Gun[] loadout;
@@ -27,14 +28,18 @@ public class Weapon : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) Equip(0);
+        if (!photonView.IsMine) return;
+        if (Input.GetKeyDown(KeyCode.Alpha1)) 
+        {
+            photonView.RPC("Equip", RpcTarget.All, 0);
+        }
         if(currentEquip != null)
         {
             Aim(Input.GetMouseButton(1));
 
             if (Input.GetMouseButtonDown(0) && shotCoolDown <= 0)
             {
-                Shoot();
+                photonView.RPC("Shoot", RpcTarget.All);
             }
 
             //weapon position elasticity
@@ -47,12 +52,11 @@ public class Weapon : MonoBehaviour
     #endregion
 
     #region Private Methods
+    [PunRPC]
     void Equip(int i)
     {
         //This will destroy weapson if player already have a weapon equiped
         if (currentEquip != null) Destroy(currentEquip);
-
-        
 
         currentIndex = i;
 
@@ -60,6 +64,7 @@ public class Weapon : MonoBehaviour
         t_newEquipment.GetComponent<Rigidbody>().isKinematic = true;
         t_newEquipment.transform.localPosition = Vector3.zero;
         t_newEquipment.transform.localEulerAngles = Vector3.zero;
+        t_newEquipment.GetComponent<Sway>().enabled = photonView.IsMine;
 
         currentEquip = t_newEquipment;
     }
@@ -85,33 +90,44 @@ public class Weapon : MonoBehaviour
 
     }
 
+    [PunRPC]
     void Shoot()
     {
         Transform t_spawn = transform.Find("Cameras/Player Camera");
-
-        //Bloom
+        //Set up Bloom
         Vector3 t_bloom = t_spawn.position + t_spawn.forward * 1000f;
+        //calculate Bloom
         t_bloom += Random.Range(-loadout[currentIndex].bloom, loadout[currentIndex].bloom) * t_spawn.up;
         t_bloom += Random.Range(-loadout[currentIndex].bloom, loadout[currentIndex].bloom) * t_spawn.right;
         t_bloom -= t_spawn.position;
         t_bloom.Normalize();
 
+        //Set shooting cooldown
+        shotCoolDown = loadout[currentIndex].fireRate;
+
         //Raycast
         RaycastHit t_hit = new RaycastHit();
-        if(Physics.Raycast(t_spawn.position, t_bloom, out t_hit, 1000f, canBeShot)) //start from camera, ahead of camera, distance of raycast, and layermask of what can be shot
+        if (Physics.Raycast(t_spawn.position, t_bloom, out t_hit, 1000f, canBeShot)) //start from camera, ahead of camera, distance of raycast, and layermask of what can be shot
         {
             //Create bullethole object where it is hit and slightly off the wall
             GameObject t_newBulletHole = Instantiate(bulletHolePrefab, t_hit.point + t_hit.normal * .001f, Quaternion.identity) as GameObject;
             t_newBulletHole.transform.LookAt(t_hit.point + t_hit.normal);
             Destroy(t_newBulletHole, 5f); //Destory in 5 seconds
+            if (photonView.IsMine)
+            {
+                //Shooing other players
+                if(t_hit.collider.gameObject.layer == 9)
+                {
+                    //Call RPC to damage that player
+                }
+            }
         }
 
         //gun fx
         currentEquip.transform.Rotate(-loadout[currentIndex].recoil, 0, 0);
         currentEquip.transform.position -= currentEquip.transform.forward * loadout[currentIndex].kickback;
 
-        //Set shooting cooldown
-        shotCoolDown = loadout[currentIndex].fireRate;
+        
     }
     #endregion
 }
