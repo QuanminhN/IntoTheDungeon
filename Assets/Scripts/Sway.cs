@@ -10,6 +10,8 @@ public class Sway : MonoBehaviourPunCallbacks
     public float smoothness;
 
     private Quaternion origin_roation;
+
+    public bool isMine;
     #endregion
 
     #region Monobehavior callbacks
@@ -33,6 +35,12 @@ public class Sway : MonoBehaviourPunCallbacks
         //controls
         float t_xmove = Input.GetAxis("Mouse X");
         float t_ymove = Input.GetAxis("Mouse Y");
+
+        if (!isMine)
+        {
+            t_xmove = 0;
+            t_ymove = 0;
+        }
 
         //calculation
         Quaternion t_xadj = Quaternion.AngleAxis(-swayIntensity * t_xmove, Vector3.up);

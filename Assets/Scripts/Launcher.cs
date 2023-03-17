@@ -22,6 +22,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     {
         StartGame();
 
+
         base.OnJoinedRoom();
     }
 

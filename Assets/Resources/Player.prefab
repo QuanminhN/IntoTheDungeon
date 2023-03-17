@@ -333,6 +333,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   groundChecker: {fileID: 3898835327630344697}
+  Max_health: 500
 --- !u!114 &3898835327633343068
 MonoBehaviour:
   m_ObjectHideFlags: 0

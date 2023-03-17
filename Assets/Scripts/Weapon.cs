@@ -22,30 +22,36 @@ public class Weapon : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
-        
+        foreach(Gun gun in loadout)
+        {
+            gun.initGun();
+        }
+        Equip(0);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!photonView.IsMine) return;
-        if (Input.GetKeyDown(KeyCode.Alpha1)) 
+        if (photonView.IsMine && Input.GetKeyDown(KeyCode.Alpha1)) 
         {
             photonView.RPC("Equip", RpcTarget.All, 0);
         }
         if(currentEquip != null)
         {
-            Aim(Input.GetMouseButton(1));
-
-            if (Input.GetMouseButtonDown(0) && shotCoolDown <= 0)
+            if (!photonView.IsMine)
             {
-                photonView.RPC("Shoot", RpcTarget.All);
-            }
+                Aim(Input.GetMouseButton(1));
 
+                if (Input.GetMouseButtonDown(0) && shotCoolDown <= 0)
+                {
+                    if (loadout[currentIndex].canFireBullet()) photonView.RPC("Shoot", RpcTarget.All);
+                    else loadout[currentIndex].Reload();
+                }
+
+                shotCoolDown -= Time.deltaTime;
+            }
             //weapon position elasticity
             currentEquip.transform.localPosition = Vector3.Lerp(currentEquip.transform.localPosition, Vector3.zero, Time.deltaTime * 4f);
-
-            shotCoolDown -= Time.deltaTime;
         }
         
     }
@@ -64,7 +70,7 @@ public class Weapon : MonoBehaviourPunCallbacks
         t_newEquipment.GetComponent<Rigidbody>().isKinematic = true;
         t_newEquipment.transform.localPosition = Vector3.zero;
         t_newEquipment.transform.localEulerAngles = Vector3.zero;
-        t_newEquipment.GetComponent<Sway>().enabled = photonView.IsMine;
+        t_newEquipment.GetComponent<Sway>().isMine = photonView.IsMine;
 
         currentEquip = t_newEquipment;
     }
@@ -118,7 +124,7 @@ public class Weapon : MonoBehaviourPunCallbacks
                 //Shooing other players
                 if(t_hit.collider.gameObject.layer == 9)
                 {
-                    //Call RPC to damage that player
+                    photonView.RPC("TakeDamage", RpcTarget.All, loadout[currentIndex].damage);
                 }
             }
         }
@@ -128,6 +134,11 @@ public class Weapon : MonoBehaviourPunCallbacks
         currentEquip.transform.position -= currentEquip.transform.forward * loadout[currentIndex].kickback;
 
         
+    }
+    [PunRPC]
+    void TakeDamage(int dmg)
+    {
+        GetComponent<PlayerMovement>().TakeDamage(dmg);
     }
     #endregion
 }

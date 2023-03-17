@@ -31,12 +31,26 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     //States
     private bool isJumping = false;
     private bool isWalking = false;
+
+    //Character Stats
+    public float Max_health;
+    private float Current_health;
+
+    //Manager
+    private GameManager manager;
+
+    //UI
+    private Transform ui_healthBar;
     #endregion
 
     #region Monobehavior Callbacks
     // Start is called before the first frame update
     void Start()
     {
+        //Find the components
+        manager = GameObject.Find("Manager").GetComponent<GameManager>();
+        ui_healthBar = GameObject.Find("HUD/Health/Bar").transform;
+
         //Change layer if character is not the player
         if (!photonView.IsMine)
         {
@@ -51,6 +65,12 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
 
         //See if it is the correct camera
         cameraParent.SetActive(photonView.IsMine);
+
+        if (photonView.IsMine)
+        {
+            Current_health = Max_health;
+            updateHealthBar();
+        }
     }
 
     void Update()
@@ -90,8 +110,11 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
             movementCounter += Time.deltaTime * 5f;
             weaponParent.localPosition = Vector3.Lerp(weaponParent.localPosition, targetWeaponBobPos, Time.deltaTime * 6f);
         }
-        
-            
+
+        if (Input.GetKeyDown(KeyCode.U)) TakeDamage(25);
+
+        //Smooth out UI 
+        updateHealthBar();
     }
 
     // Update is called once per frame
@@ -123,6 +146,33 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     void HeadBob(float px, float pxIntensity, float pyIntensity)
     {
         targetWeaponBobPos = weaponParentOrigin + new Vector3(Mathf.Cos(px) * pxIntensity, Mathf.Sin(px * 2) * pyIntensity, 0);
+    }
+    #endregion
+
+    #region Public Methods
+    public void TakeDamage(int dmg)
+    {
+        if (photonView.IsMine)
+        {
+            //Deal damage
+            Current_health -= dmg;
+            //Update Health HUD
+            updateHealthBar();
+            //Kill if player has 0 health
+            if (Current_health <= 0)
+            {
+                manager.Spawn();
+                PhotonNetwork.Destroy(this.gameObject);
+            }
+            
+
+        }    
+    }
+
+    private void updateHealthBar()
+    {
+        float temp_health = (float)Current_health / (float)Max_health;
+        ui_healthBar.localScale = Vector3.Lerp(ui_healthBar.localScale, new Vector3(temp_health, 1, 1), Time.deltaTime * 8f);
     }
     #endregion
 }
