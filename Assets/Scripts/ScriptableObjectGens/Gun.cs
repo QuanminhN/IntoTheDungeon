@@ -23,6 +23,8 @@ public class Gun : ScriptableObject
     private int stash; //Current ammo count
     private int clip; //Current clip count
 
+    public float reloadTimer;
+
     public void initGun()
     {
         stash = ammo;
@@ -44,6 +46,11 @@ public class Gun : ScriptableObject
         stash += clip;
         clip = Mathf.Min(clipsize, stash);
         stash -= clip;
+    }
+
+    public bool canReload()
+    {
+        return stash >= 0 && clip != clipsize;
     }
 
     public int getStash()

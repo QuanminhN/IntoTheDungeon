@@ -20,3 +20,6 @@ MonoBehaviour:
   recoil: 10
   kickback: 0.14
   damage: 40
+  ammo: 36
+  clipsize: 12
+  reloadTimer: 1.5

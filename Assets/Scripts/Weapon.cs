@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.UI;
 
 public class Weapon : MonoBehaviourPunCallbacks
 {
@@ -16,6 +17,8 @@ public class Weapon : MonoBehaviourPunCallbacks
     public LayerMask canBeShot;
 
     private float shotCoolDown;
+
+    private bool isReloading;
     #endregion
 
     #region Monobehavior callbacks
@@ -38,14 +41,22 @@ public class Weapon : MonoBehaviourPunCallbacks
         }
         if(currentEquip != null)
         {
-            if (!photonView.IsMine)
+            if (photonView.IsMine)
             {
                 Aim(Input.GetMouseButton(1));
 
                 if (Input.GetMouseButtonDown(0) && shotCoolDown <= 0)
                 {
                     if (loadout[currentIndex].canFireBullet()) photonView.RPC("Shoot", RpcTarget.All);
-                    else loadout[currentIndex].Reload();
+                    else 
+                    {
+                        StartCoroutine(Reload(loadout[currentIndex].reloadTimer));
+                    }
+                }
+
+                if (Input.GetKeyDown(KeyCode.R))
+                {
+                    StartCoroutine(Reload(loadout[currentIndex].reloadTimer));
                 }
 
                 shotCoolDown -= Time.deltaTime;
@@ -62,7 +73,11 @@ public class Weapon : MonoBehaviourPunCallbacks
     void Equip(int i)
     {
         //This will destroy weapson if player already have a weapon equiped
-        if (currentEquip != null) Destroy(currentEquip);
+        if (currentEquip != null)
+        {
+            if(isReloading) StopCoroutine("Reload"); //Stop reloading if swap weapon
+            Destroy(currentEquip);
+        }
 
         currentIndex = i;
 
@@ -139,6 +154,27 @@ public class Weapon : MonoBehaviourPunCallbacks
     void TakeDamage(int dmg)
     {
         GetComponent<PlayerMovement>().TakeDamage(dmg);
+    }
+
+    IEnumerator Reload(float wait)
+    {
+        isReloading = true;
+        currentEquip.SetActive(false);
+
+        yield return new WaitForSeconds(wait);
+
+        loadout[currentIndex].Reload();
+        currentEquip.SetActive(true);
+        isReloading = false;
+    }
+    #endregion
+    #region Public Method
+    public void refreshAmmo(Text p_text) 
+    {
+        int t_clip = loadout[currentIndex].getClip();
+        int t_stash = loadout[currentIndex].getStash();
+
+        p_text.text = t_clip.ToString() + " / " + t_stash.ToString();
     }
     #endregion
 }

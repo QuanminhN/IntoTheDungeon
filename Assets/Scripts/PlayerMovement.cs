@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviourPunCallbacks
 {
@@ -38,9 +39,11 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
 
     //Manager
     private GameManager manager;
+    private Weapon weapon;
 
     //UI
     private Transform ui_healthBar;
+    private Text ui_ammo;
     #endregion
 
     #region Monobehavior Callbacks
@@ -49,7 +52,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     {
         //Find the components
         manager = GameObject.Find("Manager").GetComponent<GameManager>();
-        ui_healthBar = GameObject.Find("HUD/Health/Bar").transform;
+        weapon = GetComponent<Weapon>();
 
         //Change layer if character is not the player
         if (!photonView.IsMine)
@@ -68,6 +71,8 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
 
         if (photonView.IsMine)
         {
+            ui_healthBar = GameObject.Find("HUD/Health/Bar").transform;
+            ui_ammo = GameObject.Find("HUD/Ammo/Text").GetComponent<Text>();
             Current_health = Max_health;
             updateHealthBar();
         }
@@ -115,6 +120,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
 
         //Smooth out UI 
         updateHealthBar();
+        weapon.refreshAmmo(ui_ammo);
     }
 
     // Update is called once per frame
