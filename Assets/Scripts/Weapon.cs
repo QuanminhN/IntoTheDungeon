@@ -19,6 +19,8 @@ public class Weapon : MonoBehaviourPunCallbacks
     private float shotCoolDown;
 
     private bool isReloading;
+
+    public bool isAiming = false;
     #endregion
 
     #region Monobehavior callbacks
@@ -39,20 +41,41 @@ public class Weapon : MonoBehaviourPunCallbacks
         {
             photonView.RPC("Equip", RpcTarget.All, 0);
         }
-        if(currentEquip != null)
+        else if (photonView.IsMine && Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            photonView.RPC("Equip", RpcTarget.All, 1);
+        }
+        if (currentEquip != null)
         {
             if (photonView.IsMine)
             {
                 Aim(Input.GetMouseButton(1));
 
-                if (Input.GetMouseButtonDown(0) && shotCoolDown <= 0)
+                if (loadout[currentIndex].burstMode != 1) // Burst or Semi
                 {
-                    if (loadout[currentIndex].canFireBullet()) photonView.RPC("Shoot", RpcTarget.All);
-                    else 
+                    if (Input.GetMouseButtonDown(0) && shotCoolDown <= 0)
                     {
-                        StartCoroutine(Reload(loadout[currentIndex].reloadTimer));
+                        if (loadout[currentIndex].canFireBullet()) photonView.RPC("Shoot", RpcTarget.All);
+                        else
+                        {
+                            StartCoroutine(Reload(loadout[currentIndex].reloadTimer));
+                        }
                     }
                 }
+                else
+                {
+                    if (Input.GetMouseButton(0) && shotCoolDown < 0) //Full auto
+                    {
+                        if (loadout[currentIndex].canFireBullet()) photonView.RPC("Shoot", RpcTarget.All);
+                        else
+                        {
+                            StartCoroutine(Reload(loadout[currentIndex].reloadTimer));
+                        }
+                    }
+
+                }
+
+                
 
                 if (Input.GetKeyDown(KeyCode.R))
                 {
@@ -92,7 +115,7 @@ public class Weapon : MonoBehaviourPunCallbacks
 
     void Aim(bool isAiming)
     {
-
+        this.isAiming = isAiming;
         Transform t_anchor = currentEquip.transform.Find("Anchor");
         Transform t_AdsState = currentEquip.transform.Find("States/ADS");
         Transform t_HipState = currentEquip.transform.Find("States/Hip");

@@ -97,6 +97,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         else
             isWalking = false;
 
+        //Headbob 
         if (horizontal == 0 && vertical == 0) //Idle
         {
             HeadBob(idleCounter, .025f, .025f);
@@ -151,7 +152,9 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     #region Private Methods
     void HeadBob(float px, float pxIntensity, float pyIntensity)
     {
-        targetWeaponBobPos = weaponParentOrigin + new Vector3(Mathf.Cos(px) * pxIntensity, Mathf.Sin(px * 2) * pyIntensity, 0);
+        float t_aimAdj = 1f;
+        if (weapon.isAiming) t_aimAdj = .1f;
+        targetWeaponBobPos = weaponParentOrigin + new Vector3(Mathf.Cos(px) * pxIntensity * t_aimAdj, Mathf.Sin(px * 2) * pyIntensity * t_aimAdj, 0);
     }
     #endregion
 

@@ -25,6 +25,8 @@ public class Gun : ScriptableObject
 
     public float reloadTimer;
 
+    public int burstMode; // 0 semi | 1 auto | 2 burst
+
     public void initGun()
     {
         stash = ammo;
