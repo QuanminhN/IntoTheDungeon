@@ -53,6 +53,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     public GameObject standingCollider;
     public GameObject crouchingCollider;
     private bool crouched;
+    private bool callCrouchOnce = true; // This is to call RPC once and not spam the server
 
     #endregion
 
@@ -98,12 +99,17 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         vertical = Input.GetAxisRaw("Vertical");
 
         bool isGrounded = Physics.Raycast(groundChecker.position, Vector3.down, .2f, groundLayer);
-        bool crouch = Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl);
-        bool isCrouch = crouch && isGrounded;
+        bool crouch = Input.GetKey(KeyCode.LeftControl);
 
-        if (isCrouch)
+        if (crouch)
         {
-            photonView.RPC("SetCrouch", RpcTarget.All, !crouched);
+            if(!crouched && callCrouchOnce)
+                photonView.RPC("SetCrouch", RpcTarget.All, true);
+        }
+        else
+        {
+            if(crouched && !callCrouchOnce)
+                photonView.RPC("SetCrouch", RpcTarget.All, false);
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
@@ -202,6 +208,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
 
         crouched = t_state;
 
+        callCrouchOnce = !callCrouchOnce;
         if (crouched)
         {
             standingCollider.SetActive(false);
