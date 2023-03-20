@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 947a44740a73df243a0730e4b5911151, type: 3}
-  m_Name: Pistol
+  m_Name: Shotgun
   m_EditorClassIdentifier: 
-  gunName: Pistol
-  fireRate: 0.15
-  prefab: {fileID: 4701176601565600640, guid: 964594baae109984c8bfcff54e02160c, type: 3}
+  gunName: Shotgun
+  fireRate: 0.05
+  prefab: {fileID: 4701176601565600640, guid: 6eb6e7420d67a094abdd01e27d536822, type: 3}
   aimSpeed: 20
-  bloom: 20
-  recoil: 10
-  kickback: 0.14
-  damage: 40
-  ammo: 36
-  clipsize: 12
+  bloom: 80
+  recoil: 30
+  kickback: 0.5
+  damage: 20
+  ammo: 24
+  clipsize: 8
   reloadTimer: 1.5
   burstMode: 0
-  pellets: 1
+  pellets: 10

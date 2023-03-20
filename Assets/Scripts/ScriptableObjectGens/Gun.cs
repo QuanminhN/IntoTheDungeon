@@ -27,6 +27,8 @@ public class Gun : ScriptableObject
 
     public int burstMode; // 0 semi | 1 auto | 2 burst
 
+    public int pellets;
+
     public void initGun()
     {
         stash = ammo;

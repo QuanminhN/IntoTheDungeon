@@ -24,3 +24,4 @@ MonoBehaviour:
   clipsize: 30
   reloadTimer: 2.5
   burstMode: 1
+  pellets: 1
