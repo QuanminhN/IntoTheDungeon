@@ -86,6 +86,7 @@ public class Weapon : MonoBehaviourPunCallbacks
             }
             //weapon position elasticity
             currentEquip.transform.localPosition = Vector3.Lerp(currentEquip.transform.localPosition, Vector3.zero, Time.deltaTime * 4f);
+            currentEquip.transform.rotation = Quaternion.Lerp(currentEquip.transform.rotation, weaponParent.rotation, Time.deltaTime * 4f);
         }
         
     }
@@ -153,10 +154,14 @@ public class Weapon : MonoBehaviourPunCallbacks
         RaycastHit t_hit = new RaycastHit();
         if (Physics.Raycast(t_spawn.position, t_bloom, out t_hit, 1000f, canBeShot)) //start from camera, ahead of camera, distance of raycast, and layermask of what can be shot
         {
-            //Create bullethole object where it is hit and slightly off the wall
-            GameObject t_newBulletHole = Instantiate(bulletHolePrefab, t_hit.point + t_hit.normal * .001f, Quaternion.identity) as GameObject;
-            t_newBulletHole.transform.LookAt(t_hit.point + t_hit.normal);
-            Destroy(t_newBulletHole, 5f); //Destory in 5 seconds
+            //Create bullethole object if its not on a player
+            if(t_hit.transform.gameObject.layer != 9)
+            {
+                GameObject t_newBulletHole = Instantiate(bulletHolePrefab, t_hit.point + t_hit.normal * .001f, Quaternion.identity) as GameObject;
+                t_newBulletHole.transform.LookAt(t_hit.point + t_hit.normal);
+                Destroy(t_newBulletHole, 5f); //Destory in 5 seconds
+            }
+            
             if (photonView.IsMine)
             {
                 //Shooing other players
