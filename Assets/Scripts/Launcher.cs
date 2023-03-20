@@ -13,8 +13,6 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        Join();
-
         base.OnConnectedToMaster(); //This calls the base function
     }
 
