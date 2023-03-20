@@ -4,7 +4,8 @@ using UnityEngine;
 using Photon.Pun;
 using UnityEngine.UI;
 
-public class PlayerMovement : MonoBehaviourPunCallbacks
+
+public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
 {
     #region Variables
     //Components
@@ -55,6 +56,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     private bool crouched;
     private bool callCrouchOnce = true; // This is to call RPC once and not spam the server
 
+    private float aimAngle;
     #endregion
 
     #region Monobehavior Callbacks
@@ -69,6 +71,8 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
         if (!photonView.IsMine)
         {
             gameObject.layer = 9;
+            standingCollider.layer = 9;
+            crouchingCollider.layer = 9;
         }
         rb = GetComponent<Rigidbody>();
         WeaponParentCurrentPos = weaponParentOrigin = weaponParent.localPosition;
@@ -92,8 +96,11 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
 
     void Update()
     {
-        if (!photonView.IsMine) return; //If the view does not belong to the player you can move them
-
+        if (!photonView.IsMine) //If the view does not belong to the player you can move them
+        {
+            RefreshMultiplayerState();
+            return;
+        }
         //Get the inputs for vertical and horizontal
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
@@ -222,6 +229,20 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
             WeaponParentCurrentPos -= Vector3.down * crouchAmount;
         }
     }
+
+    private void RefreshMultiplayerState()
+    {
+        // Keep track of where the other players are looking
+        // and set it so that it is shown to the network
+        float cacheEulY = weaponParent.localEulerAngles.y;
+        Quaternion targetRotation = Quaternion.identity * Quaternion.AngleAxis(aimAngle, Vector3.right);
+        weaponParent.rotation = Quaternion.Slerp(weaponParent.rotation, targetRotation, Time.deltaTime * 8f);
+
+        Vector3 finalRotation = weaponParent.localEulerAngles;
+        finalRotation.y = cacheEulY;
+
+        weaponParent.localEulerAngles = finalRotation;
+    }
     #endregion
 
     #region Public Methods
@@ -248,6 +269,20 @@ public class PlayerMovement : MonoBehaviourPunCallbacks
     {
         float temp_health = (float)Current_health / (float)Max_health;
         ui_healthBar.localScale = Vector3.Lerp(ui_healthBar.localScale, new Vector3(temp_health, 1, 1), Time.deltaTime * 8f);
+    }
+    #endregion
+
+    #region Photon Callback
+    public void OnPhotonSerializeView(PhotonStream p_stream, PhotonMessageInfo p_message)
+    {
+        if (p_stream.IsWriting)//If it is the player write to the stream to send to network
+        {
+            p_stream.SendNext((int)(weaponParent.transform.localEulerAngles.x * 100f));
+        }
+        else//not the player so... read the stream
+        {
+            aimAngle = (int)p_stream.ReceiveNext() / 100f;
+        }
     }
     #endregion
 }
