@@ -20,8 +20,8 @@ public class Gun : ScriptableObject
     public int ammo;
     public int clipsize;
 
-    private int stash; //Current ammo count
-    private int clip; //Current clip count
+    public int stash; //Current ammo count
+    public int clip; //Current clip count
 
     public float reloadTimer;
 

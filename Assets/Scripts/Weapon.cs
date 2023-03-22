@@ -79,12 +79,15 @@ public class Weapon : MonoBehaviourPunCallbacks
 
                 }
 
-                
 
-                if (Input.GetKeyDown(KeyCode.R))
+                if (loadout[currentIndex].clip != loadout[currentIndex].clipsize)
                 {
-                    StartCoroutine(Reload(loadout[currentIndex].reloadTimer));
+                    if (Input.GetKeyDown(KeyCode.R))
+                    {
+                        StartCoroutine(Reload(loadout[currentIndex].reloadTimer));
+                    }
                 }
+                
 
                 shotCoolDown -= Time.deltaTime;
             }
