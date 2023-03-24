@@ -29,6 +29,7 @@ public class LookAround : MonoBehaviourPunCallbacks
     void Update()
     {
         if (!photonView.IsMine) return;
+        if (Pause.paused) return;
         float mouseX = Input.GetAxis("Mouse X") * xSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * ySensitivity * Time.deltaTime;
 

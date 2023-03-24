@@ -25,6 +25,7 @@ public class Sway : MonoBehaviourPunCallbacks
     void Update()
     {
         if (!photonView.IsMine) return;
+        if (Pause.paused) return;
         updateSway();
     }
     #endregion

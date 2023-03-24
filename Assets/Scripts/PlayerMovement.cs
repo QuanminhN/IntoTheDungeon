@@ -107,7 +107,24 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
 
         bool isGrounded = Physics.Raycast(groundChecker.position, Vector3.down, .2f, groundLayer);
         bool crouch = Input.GetKey(KeyCode.LeftControl);
+        bool pause = Input.GetKeyDown(KeyCode.Escape);
 
+        //Pausing
+        if (pause)
+        {
+            GameObject.Find("Pause").GetComponent<Pause>().TogglePause();
+        }
+        if (Pause.paused)
+        {
+            horizontal = 0f;
+            vertical = 0f;
+            isGrounded = false;
+            isJumping = false;
+            crouch = false;
+            isWalking = false;
+        }
+
+        //Crouching
         if (crouch)
         {
             if(!crouched && callCrouchOnce)
@@ -167,10 +184,19 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
         if (!photonView.IsMine) return; //If the view does not belong to the player you can move them
 
         float speed = runSpeed;
-
+        if (Pause.paused)
+        {
+            speed = 0;
+            horizontal = 0;
+            vertical = 0;
+            isJumping = false;
+            isWalking = false;
+            crouched = false;
+        }
         Vector3 t_move = new Vector3(horizontal, 0, vertical);
         t_move.Normalize();
         //Debug.Log(t_move);
+        
         if (isJumping)
         {
             rb.AddForce(Vector3.up * jumpForce);
