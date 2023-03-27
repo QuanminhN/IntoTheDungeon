@@ -62,7 +62,7 @@ public class Weapon : MonoBehaviourPunCallbacks
 
                 if (loadout[currentIndex].burstMode != 1) // Burst or Semi
                 {
-                    if (Input.GetMouseButtonDown(0) && shotCoolDown <= 0)
+                    if (Input.GetMouseButtonDown(0) && shotCoolDown <= 0 && !isReloading)
                     {
                         if (loadout[currentIndex].canFireBullet()) photonView.RPC("Shoot", RpcTarget.All);
                         else
@@ -73,7 +73,7 @@ public class Weapon : MonoBehaviourPunCallbacks
                 }
                 else
                 {
-                    if (Input.GetMouseButton(0) && shotCoolDown < 0) //Full auto
+                    if (Input.GetMouseButton(0) && shotCoolDown < 0 && !isReloading) //Full auto
                     {
                         if (loadout[currentIndex].canFireBullet()) photonView.RPC("Shoot", RpcTarget.All);
                         else
@@ -219,7 +219,14 @@ public class Weapon : MonoBehaviourPunCallbacks
     IEnumerator Reload(float wait)
     {
         isReloading = true;
-        currentEquip.SetActive(false);
+        if (currentEquip.GetComponent<Animator>())
+        {
+            currentEquip.GetComponent<Animator>().Play("Reload", 0, 0);
+        }
+        else
+        {
+            currentEquip.SetActive(false);
+        }
 
         yield return new WaitForSeconds(wait);
 

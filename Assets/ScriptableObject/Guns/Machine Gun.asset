@@ -23,8 +23,8 @@ MonoBehaviour:
   ammo: 120
   clipsize: 30
   stash: 120
-  clip: 30
-  reloadTimer: 2.5
+  clip: 26
+  reloadTimer: 2
   burstMode: 1
   pellets: 1
   MainFOV: 0.6
