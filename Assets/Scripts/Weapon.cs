@@ -21,6 +21,8 @@ public class Weapon : MonoBehaviourPunCallbacks
     private bool isReloading;
 
     public bool isAiming = false;
+
+    [HideInInspector] public Gun currentGunData;
     #endregion
 
     #region Monobehavior callbacks
@@ -56,7 +58,7 @@ public class Weapon : MonoBehaviourPunCallbacks
         {
             if (photonView.IsMine)
             {
-                Aim(Input.GetMouseButton(1));
+                //Aim(Input.GetMouseButton(1));
 
                 if (loadout[currentIndex].burstMode != 1) // Burst or Semi
                 {
@@ -121,11 +123,26 @@ public class Weapon : MonoBehaviourPunCallbacks
         t_newEquipment.transform.localEulerAngles = Vector3.zero;
         t_newEquipment.GetComponent<Sway>().isMine = photonView.IsMine;
 
+        if (photonView.IsMine) ChangeLayers(t_newEquipment, 8); //This number is the layer for Gun
+        else ChangeLayers(t_newEquipment, 0);
+
         currentEquip = t_newEquipment;
+        currentGunData = loadout[i];
     }
 
-    void Aim(bool isAiming)
+    private void ChangeLayers(GameObject p_obj, int p_layer)
     {
+        p_obj.layer = p_layer;
+        foreach(Transform a in p_obj.transform)
+        {
+            ChangeLayers(a.gameObject, p_layer);
+        }
+    }
+
+    public void Aim(bool isAiming)
+    {
+        if (!currentEquip) return;
+
         this.isAiming = isAiming;
         Transform t_anchor = currentEquip.transform.Find("Anchor");
         Transform t_AdsState = currentEquip.transform.Find("States/ADS");

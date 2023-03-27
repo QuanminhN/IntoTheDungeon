@@ -29,6 +29,8 @@ public class Gun : ScriptableObject
 
     public int pellets;
 
+    [Range(0, 1)] public float MainFOV;
+    [Range(0, 1)] public float ZoomInFOV;
     public void initGun()
     {
         stash = ammo;

@@ -22,6 +22,10 @@ MonoBehaviour:
   damage: 20
   ammo: 24
   clipsize: 8
+  stash: 24
+  clip: 8
   reloadTimer: 1.5
   burstMode: 0
   pellets: 10
+  MainFOV: 0.6
+  ZoomInFOV: 0.45

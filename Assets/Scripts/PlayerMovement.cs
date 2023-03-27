@@ -12,7 +12,11 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
     private Rigidbody rb;
     public Transform weaponParent;
     public GameObject cameraParent;
+
     public Camera normalCam;
+    public Camera zoomInCam;
+    float baseFOV;
+
     private Vector3 camOrigin;
     //Movement Values
     [SerializeField] private float runSpeed = 300f;
@@ -57,6 +61,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
     private bool callCrouchOnce = true; // This is to call RPC once and not spam the server
 
     private float aimAngle;
+    private bool isAiming;
     #endregion
 
     #region Monobehavior Callbacks
@@ -90,6 +95,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
             ui_healthBar = GameObject.Find("HUD/Health/Bar").transform;
             ui_ammo = GameObject.Find("HUD/Ammo/Text").GetComponent<Text>();
             Current_health = Max_health;
+            baseFOV = normalCam.fieldOfView;
             updateHealthBar();
         }
     }
@@ -105,9 +111,11 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
 
+        //States
         bool isGrounded = Physics.Raycast(groundChecker.position, Vector3.down, .2f, groundLayer);
         bool crouch = Input.GetKey(KeyCode.LeftControl);
         bool pause = Input.GetKeyDown(KeyCode.Escape);
+        isAiming = Input.GetMouseButton(1);
 
         //Pausing
         if (pause)
@@ -172,6 +180,19 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
         }
 
         if (Input.GetKeyDown(KeyCode.U)) TakeDamage(25);
+
+        weapon.Aim(isAiming);
+
+        if (isAiming)
+        {
+            normalCam.fieldOfView = Mathf.Lerp(normalCam.fieldOfView, baseFOV * weapon.currentGunData.MainFOV, Time.deltaTime * 8f);
+            zoomInCam.fieldOfView = Mathf.Lerp(zoomInCam.fieldOfView, baseFOV * weapon.currentGunData.ZoomInFOV, Time.deltaTime * 8f);
+        }
+        else
+        {
+            normalCam.fieldOfView = Mathf.Lerp(normalCam.fieldOfView, baseFOV, Time.deltaTime * 8f);
+            zoomInCam.fieldOfView = Mathf.Lerp(zoomInCam.fieldOfView, baseFOV, Time.deltaTime * 8f);
+        }
 
         //Smooth out UI 
         updateHealthBar();

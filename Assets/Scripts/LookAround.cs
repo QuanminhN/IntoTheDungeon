@@ -8,6 +8,7 @@ public class LookAround : MonoBehaviourPunCallbacks
 
     #region Variables
     [SerializeField] Camera cam;
+    [SerializeField] Camera zoomInCam;
     [SerializeField] private Transform player;
     public Transform weapon;
 
@@ -45,6 +46,8 @@ public class LookAround : MonoBehaviourPunCallbacks
         {
             updateCursorState();
         }
+
+        zoomInCam.transform.localRotation = cam.transform.localRotation;
     }
     #endregion
 
