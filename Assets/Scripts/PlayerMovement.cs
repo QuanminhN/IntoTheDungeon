@@ -51,6 +51,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
     //UI
     private Transform ui_healthBar;
     private Text ui_ammo;
+    private Text ui_username;
 
     //Crouching
     public float crouchModifer;
@@ -94,8 +95,10 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
             camOrigin = normalCam.transform.localPosition;
             ui_healthBar = GameObject.Find("HUD/Health/Bar").transform;
             ui_ammo = GameObject.Find("HUD/Ammo/Text").GetComponent<Text>();
+            ui_username = GameObject.Find("HUD/Username/Text").GetComponent<Text>();
             Current_health = Max_health;
             baseFOV = normalCam.fieldOfView;
+            ui_username.text = Launcher.myProfile.username;
             updateHealthBar();
         }
     }

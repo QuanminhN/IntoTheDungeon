@@ -2,9 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.UI;
+using TMPro;
+
+public class PlayerData
+{
+    public string username;
+    public int level;
+    public int xp;
+
+}
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
+    public static PlayerData myProfile = new PlayerData();
+    public TMP_InputField usernameField;
     public void Awake()
     {
         PhotonNetwork.AutomaticallySyncScene = true; // Sync all clients to the host/master scene
@@ -50,6 +62,15 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public void StartGame()
     {
+        if (string.IsNullOrEmpty(usernameField.text))
+        {
+            myProfile.username = "RANDOM_USER" + Random.Range(1000, 9999).ToString();
+        }
+        else
+        {
+            myProfile.username = usernameField.text;
+        }
+        
         if(PhotonNetwork.CurrentRoom.PlayerCount == 1) //if leader of the room
         {
             PhotonNetwork.LoadLevel(1); //Load up the new scene (Check number in the Build Scene Setting)
