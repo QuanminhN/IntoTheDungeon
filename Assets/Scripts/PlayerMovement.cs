@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.UI;
-
+using TMPro;
 
 public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
 {
@@ -63,6 +63,9 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
 
     private float aimAngle;
     private bool isAiming;
+
+    [HideInInspector]public PlayerData playerProfile;
+    public TextMeshPro playerUsername;
     #endregion
 
     #region Monobehavior Callbacks
@@ -100,6 +103,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
             baseFOV = normalCam.fieldOfView;
             ui_username.text = Launcher.myProfile.username;
             updateHealthBar();
+            photonView.RPC("SyncUserProfile", RpcTarget.All, Launcher.myProfile.username, Launcher.myProfile.level, Launcher.myProfile.xp);
         }
     }
 
@@ -292,6 +296,13 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
         finalRotation.y = cacheEulY;
 
         weaponParent.localEulerAngles = finalRotation;
+    }
+
+    [PunRPC]
+    void SyncUserProfile(string t_username, int t_level, int t_xp)
+    {
+        playerProfile = new PlayerData(t_username, t_level, t_xp);
+        playerUsername.text = playerProfile.username;
     }
     #endregion
 
