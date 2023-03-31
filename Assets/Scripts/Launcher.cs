@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using UnityEngine.UI;
 using TMPro;
+using Photon.Realtime;
 
 [System.Serializable]
 public class PlayerData
@@ -30,6 +31,14 @@ public class Launcher : MonoBehaviourPunCallbacks
 {
     public static PlayerData myProfile = new PlayerData();
     public TMP_InputField usernameField;
+
+    //Tabs
+    public GameObject mainTab;
+    public GameObject roomsTab;
+
+    public GameObject roomBottonPrefab;
+
+    private List<RoomInfo> roomList;
     public void Awake()
     {
         PhotonNetwork.AutomaticallySyncScene = true; // Sync all clients to the host/master scene
@@ -42,6 +51,8 @@ public class Launcher : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         Debug.Log("CONNECTED TO MASTER");
+
+        PhotonNetwork.JoinLobby();
         base.OnConnectedToMaster(); //This calls the base function
     }
 
@@ -62,7 +73,10 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public void CreateNewRoom()
     {
-        PhotonNetwork.CreateRoom("");
+        RoomOptions options = new RoomOptions(); //Used to set room settings
+        options.MaxPlayers = 8;
+
+        PhotonNetwork.CreateRoom("", options);
     }
 
     public void Connect()
@@ -92,5 +106,59 @@ public class Launcher : MonoBehaviourPunCallbacks
             Data.SaveProfile(myProfile);
             PhotonNetwork.LoadLevel(1); //Load up the new scene (Check number in the Build Scene Setting)
         }
+    }
+
+    public void TabCloseAll()
+    {
+        mainTab.SetActive(false);
+        roomsTab.SetActive(false);
+    }
+
+    public void OpenMainTab()
+    {
+        TabCloseAll();
+        mainTab.SetActive(true);
+    }
+    public void OpenRoomTab()
+    {
+        TabCloseAll();
+        roomsTab.SetActive(true);
+    }
+
+    private void ClearRoomList()
+    {
+        Transform contents = roomsTab.transform.Find("Scroll View/Viewport/Content");
+        foreach(Transform content in contents)
+        {
+            Debug.Log("DELETE");
+            Destroy(content.gameObject);
+        }
+    }
+
+    public override void OnRoomListUpdate(List<RoomInfo> t_roomList)
+    {
+        roomList = t_roomList;
+        ClearRoomList();
+
+        Debug.Log("LOAD ROOMS @ " + Time.time);
+        Transform content = roomsTab.transform.Find("Scroll View/Viewport/Content");
+
+        foreach(RoomInfo room in roomList)
+        {
+            GameObject newRoomButton = Instantiate(roomBottonPrefab, content);
+            newRoomButton.transform.Find("Name").GetComponent<Text>().text = room.Name;
+            newRoomButton.transform.Find("Capacity").GetComponent<Text>().text = room.PlayerCount + " / " + room.MaxPlayers;
+
+            newRoomButton.GetComponent<Button>().onClick.AddListener(delegate { JoinRoom(newRoomButton.transform); });
+        }
+
+        base.OnRoomListUpdate(roomList);
+    }
+
+    public void JoinRoom(Transform t_button)
+    {
+        Debug.Log("JOIN ROOM @ " + Time.time);
+        string t_roomName = t_button.transform.Find("Name").GetComponent<TextMeshPro>().text;
+        PhotonNetwork.JoinRoom(t_roomName);
     }
 }
