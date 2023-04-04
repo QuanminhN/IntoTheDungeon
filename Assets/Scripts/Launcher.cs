@@ -35,8 +35,14 @@ public class Launcher : MonoBehaviourPunCallbacks
     //Tabs
     public GameObject mainTab;
     public GameObject roomsTab;
+    public GameObject createTab;
 
     public GameObject roomBottonPrefab;
+
+    //Create room
+    public TMP_InputField roomNameField;
+    public Slider maxPlayersSlider;
+    public TMP_Text maxPlayerValue;
 
     private List<RoomInfo> roomList;
     public void Awake()
@@ -74,9 +80,23 @@ public class Launcher : MonoBehaviourPunCallbacks
     public void CreateNewRoom()
     {
         RoomOptions options = new RoomOptions(); //Used to set room settings
-        options.MaxPlayers = 8;
+        options.MaxPlayers = (byte)maxPlayersSlider.value;
 
-        PhotonNetwork.CreateRoom("", options);
+        ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
+        properties.Add("Map", 0);
+        options.CustomRoomProperties = properties;
+
+        PhotonNetwork.CreateRoom(roomNameField.text, options);
+    }
+
+    public void ChangeMap()
+    {
+
+    }
+
+    public void ChangeMaxPlayerSlider(float t_val)
+    {
+        maxPlayerValue.text = Mathf.RoundToInt(t_val).ToString();
     }
 
     public void Connect()
@@ -112,6 +132,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     {
         mainTab.SetActive(false);
         roomsTab.SetActive(false);
+        createTab.SetActive(false);
     }
 
     public void OpenMainTab()
@@ -123,6 +144,12 @@ public class Launcher : MonoBehaviourPunCallbacks
     {
         TabCloseAll();
         roomsTab.SetActive(true);
+    }
+
+    public void OpenCreateTab()
+    {
+        TabCloseAll();
+        createTab.SetActive(true);
     }
 
     private void ClearRoomList()
