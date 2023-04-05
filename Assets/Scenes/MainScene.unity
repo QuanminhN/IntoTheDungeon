@@ -352,11 +352,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dbf4fb32bc84424fb7b1b4897d59d28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player_prefab: Player
+  player_prefab: {fileID: 3898835327633343047, guid: fd691541f764e714184522ba1cc07840, type: 3}
+  player_prefab_string: Player
   spawns:
   - {fileID: 957741199}
   - {fileID: 353986352}
   - {fileID: 325912813}
+  myId: 0
 --- !u!1 &547764871
 GameObject:
   m_ObjectHideFlags: 0

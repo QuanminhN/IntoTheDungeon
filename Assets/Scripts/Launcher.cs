@@ -112,16 +112,10 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public void StartGame()
     {
-        if (string.IsNullOrEmpty(usernameField.text))
-        {
-            myProfile.username = "RANDOM_USER" + Random.Range(1000, 9999).ToString();
-        }
-        else
-        {
-            myProfile.username = usernameField.text;
-        }
-        
-        if(PhotonNetwork.CurrentRoom.PlayerCount == 1) //if leader of the room
+
+        VerifyUsername();
+
+        if (PhotonNetwork.CurrentRoom.PlayerCount == 1) //if leader of the room
         {
             Data.SaveProfile(myProfile);
             PhotonNetwork.LoadLevel(1); //Load up the new scene (Check number in the Build Scene Setting)
@@ -184,8 +178,25 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public void JoinRoom(Transform t_button)
     {
-        Debug.Log("JOIN ROOM @ " + Time.time);
+        VerifyUsername();
+
+        //Debug.Log("JOIN ROOM @ " + Time.time);
         string t_roomName = t_button.transform.Find("Name").GetComponent<TextMeshPro>().text;
         PhotonNetwork.JoinRoom(t_roomName);
+    }
+
+    private void VerifyUsername()
+    {
+        if (string.IsNullOrEmpty(usernameField.text))
+        {
+            if (string.IsNullOrEmpty(usernameField.text))
+            {
+                myProfile.username = "RANDOM_USER" + Random.Range(1000, 9999).ToString();
+            }
+            else
+            {
+                myProfile.username = usernameField.text;
+            }
+        }
     }
 }

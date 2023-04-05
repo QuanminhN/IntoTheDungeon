@@ -318,8 +318,12 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
             //Kill if player has 0 health
             if (Current_health <= 0)
             {
-                manager.Spawn();
+                //Destory object
                 PhotonNetwork.Destroy(this.gameObject);
+                //Send to network to update stats
+                manager.ChangeStat_S(PhotonNetwork.LocalPlayer.ActorNumber, 1, 1);
+                //spawn player after destroying old body
+                manager.Spawn(); 
             }
             
 
