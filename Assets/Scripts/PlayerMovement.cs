@@ -186,7 +186,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
             weaponParent.localPosition = Vector3.Lerp(weaponParent.localPosition, targetWeaponBobPos, Time.deltaTime * 6f);
         }
 
-        if (Input.GetKeyDown(KeyCode.U)) TakeDamage(25);
+        if (Input.GetKeyDown(KeyCode.U)) TakeDamage(100, -1);
 
         weapon.Aim(isAiming);
 
@@ -307,9 +307,8 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
     #endregion
 
     #region Public Methods
-    public void TakeDamage(int dmg)
+    public void TakeDamage(int dmg, int t_actor)
     {
-        Debug.Log("ACTOR NUMBER: " + PhotonNetwork.LocalPlayer.ActorNumber);
         if (photonView.IsMine)
         {
             
@@ -320,13 +319,17 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
             //Kill if player has less than 0 health
             if (Current_health <= 0)
             {
-                
-                //Destory object
-                PhotonNetwork.Destroy(this.gameObject);
+                //spawn player after destroying old body
+                manager.Spawn();
                 //Send to network to update stats
                 manager.ChangeStat_S(PhotonNetwork.LocalPlayer.ActorNumber, 1, 1);
-                //spawn player after destroying old body
-                manager.Spawn(); 
+                Debug.Log("CHANGE STATS FOR :" + PhotonNetwork.LocalPlayer.ActorNumber);
+                if (t_actor >= 0)
+                    manager.ChangeStat_S(t_actor , 0, 1);
+                //Destory object
+                PhotonNetwork.Destroy(this.gameObject);
+                
+                
             }
             
 

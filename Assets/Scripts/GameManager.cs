@@ -5,6 +5,7 @@ using Photon.Pun;
 using UnityEngine.SceneManagement;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
+using UnityEngine.UI;
 
 public class PlayerInfo
 {
@@ -34,6 +35,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback
     public int myId;
 
     private int numOfFields = 6;
+
+    private Text ui_mykills;
+    private Text ui_myDeaths;
+    [SerializeField] private GameObject Canvas;
     #endregion
 
     #region Enums
@@ -45,11 +50,45 @@ public class GameManager : MonoBehaviour, IOnEventCallback
     }
 
     #endregion
+
+    public void OnEnable()
+    {
+        PhotonNetwork.AddCallbackTarget(this);
+    }
+
+    public void OnDisable()
+    {
+        PhotonNetwork.RemoveCallbackTarget(this);
+    }
+
     private void Start()
     {
         ValidateConnection();
+        InitUI();
         NewPlayer_S(Launcher.myProfile);
         Spawn();
+    }
+
+    private void InitUI()
+    {
+        ui_mykills = GameObject.Find("HUD/Kills/Text").GetComponent<Text>();
+        ui_myDeaths = GameObject.Find("HUD/Death/Text").GetComponent<Text>();
+
+        RefreshMyStats();
+    }
+
+    private void RefreshMyStats()
+    {
+        if(playerInfo.Count > myId)
+        {
+            ui_mykills.text = $"Kills: {playerInfo[myId].kills}";
+            ui_myDeaths.text = $"Deaths: {playerInfo[myId].deaths}";
+        }
+        else
+        {
+            ui_mykills.text = $"Kills: 0";
+            ui_myDeaths.text = $"Deaths: 0";
+        }
     }
 
     public void Spawn()
@@ -67,6 +106,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback
 
         EventCodes ec = (EventCodes)photonEvent.Code;
 
+        Debug.Log("EVENT CODE: " +ec);
+
         object[] obj = (object[])photonEvent.CustomData;
 
         switch (ec)
@@ -81,8 +122,6 @@ public class GameManager : MonoBehaviour, IOnEventCallback
                 ChangeStat_R(obj);
                 break;
         }
-
-
     }
     #endregion
 
@@ -91,9 +130,11 @@ public class GameManager : MonoBehaviour, IOnEventCallback
         if (PhotonNetwork.IsConnected) return; //Able to connet go to room
         SceneManager.LoadScene(0); //else return back to main menu
     }
-
+    #region Event
+    
     public void NewPlayer_S(PlayerData t_data)
     {
+        Debug.Log("SENDING NEW PLAYER DATA");
         object[] package = new object[numOfFields];
 
         //Set data for new player
@@ -115,12 +156,14 @@ public class GameManager : MonoBehaviour, IOnEventCallback
 
     public void NewPlayer_R(object[] t_data)
     {
+        Debug.Log("RECIEVING NEW PLAYER DATA");
         PlayerInfo p = new PlayerInfo(
             new PlayerData((string)t_data[0], (int)t_data[1], (int)t_data[2]),
             (int)t_data[3],
             (short)t_data[4],
             (short)t_data[5]
-            );
+        );
+
         playerInfo.Add(p);
 
         UpdatePlayers_S(playerInfo);
@@ -128,6 +171,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback
 
     public void UpdatePlayers_S(List<PlayerInfo> info)
     {
+        Debug.Log("SENDING UPDATE PLAYER DATA");
+        //Create package array the size of how many players there are
+        //in the room
         object[] package = new object[info.Count];
 
         for(int i = 0; i < info.Count; i++)
@@ -154,6 +200,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback
 
     public void UpdatePlayers_R(object[] data)
     {
+        Debug.Log("RECIEVING UPDATE PLAYER DATA");
         playerInfo = new List<PlayerInfo>();
 
         for(int i = 0; i < data.Length; i++)
@@ -179,6 +226,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback
 
     public void ChangeStat_S(int actor, byte stat, byte amt)
     {
+        Debug.Log("SENDING CHANGE PLAYER DATA");
         object[] package = new object[] { actor, stat, amt };
 
         PhotonNetwork.RaiseEvent(
@@ -191,11 +239,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback
 
     public void ChangeStat_R(object[] data)
     {
+        Debug.Log("RECIEVING NEW PLAYER DATA");
         int act = (int)data[0];
         byte stat = (byte)data[1];
         byte amt = (byte)data[2];
-
-        Debug.Log("CHANGE STATS");
 
         for(int i = 0; i < playerInfo.Count; i++)
         {
@@ -213,7 +260,9 @@ public class GameManager : MonoBehaviour, IOnEventCallback
                         break;
                 }
 
+                if (i == myId) RefreshMyStats();
             }
         }
     }
+    #endregion
 }

@@ -195,7 +195,7 @@ public class Weapon : MonoBehaviourPunCallbacks
                     //Shooing other players
                     if (t_hit.collider.gameObject.layer == 9)
                     {
-                        t_hit.collider.transform.root.gameObject.GetPhotonView().RPC("TakeDamage", RpcTarget.All, loadout[currentIndex].damage);
+                        t_hit.collider.transform.root.gameObject.GetPhotonView().RPC("TakeDamage", RpcTarget.All, loadout[currentIndex].damage, PhotonNetwork.LocalPlayer.ActorNumber);
                     }
                 }
             }
@@ -211,9 +211,9 @@ public class Weapon : MonoBehaviourPunCallbacks
         
     }
     [PunRPC]
-    void TakeDamage(int dmg)
+    void TakeDamage(int dmg, int t_actor)
     {
-        GetComponent<PlayerMovement>().TakeDamage(dmg);
+        GetComponent<PlayerMovement>().TakeDamage(dmg, t_actor);
     }
 
     IEnumerator Reload(float wait)

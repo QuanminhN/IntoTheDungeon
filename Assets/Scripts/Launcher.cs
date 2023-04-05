@@ -198,14 +198,11 @@ public class Launcher : MonoBehaviourPunCallbacks
     {
         if (string.IsNullOrEmpty(usernameField.text))
         {
-            if (string.IsNullOrEmpty(usernameField.text))
-            {
-                myProfile.username = "RANDOM_USER" + UnityEngine.Random.Range(1000, 9999).ToString();
-            }
-            else
-            {
-                myProfile.username = usernameField.text;
-            }
+            myProfile.username = "RANDOM_USER" + UnityEngine.Random.Range(1000, 9999).ToString();
+        }
+        else
+        {
+            myProfile.username = usernameField.text;
         }
     }
 
