@@ -3134,7 +3134,7 @@ MonoBehaviour:
   mainTab: {fileID: 432320782}
   roomsTab: {fileID: 1418518377}
   createTab: {fileID: 185846339}
-  roomBottonPrefab: {fileID: 8737627690472449960}
+  roomBottonPrefab: {fileID: 6327469402267348983, guid: 61b694a5f0e07c14d814447f8879150e, type: 3}
   roomNameField: {fileID: 1295009558}
   maxPlayersSlider: {fileID: 2084351423}
   maxPlayerValue: {fileID: 1208624271}
@@ -6280,7 +6280,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 934351599}
   m_HandleRect: {fileID: 934351598}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -6733,11 +6733,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 61b694a5f0e07c14d814447f8879150e, type: 3}
---- !u!1 &8737627690472449960 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6327469402267348983, guid: 61b694a5f0e07c14d814447f8879150e, type: 3}
-  m_PrefabInstance: {fileID: 8737627690472449959}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &8737627690472449961 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1128578590054490042, guid: 61b694a5f0e07c14d814447f8879150e, type: 3}

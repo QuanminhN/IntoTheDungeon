@@ -5,6 +5,7 @@ using Photon.Pun;
 using UnityEngine.UI;
 using TMPro;
 using Photon.Realtime;
+using System;
 
 [System.Serializable]
 public class PlayerData
@@ -151,8 +152,8 @@ public class Launcher : MonoBehaviourPunCallbacks
         Transform contents = roomsTab.transform.Find("Scroll View/Viewport/Content");
         foreach(Transform content in contents)
         {
-            Debug.Log("DELETE");
-            Destroy(content.gameObject);
+            if (content.gameObject != null)
+                Destroy(content.gameObject);
         }
     }
 
@@ -163,15 +164,22 @@ public class Launcher : MonoBehaviourPunCallbacks
 
         Debug.Log("LOAD ROOMS @ " + Time.time);
         Transform content = roomsTab.transform.Find("Scroll View/Viewport/Content");
-
-        foreach(RoomInfo room in roomList)
+        try
         {
-            GameObject newRoomButton = Instantiate(roomBottonPrefab, content);
-            newRoomButton.transform.Find("Name").GetComponent<Text>().text = room.Name;
-            newRoomButton.transform.Find("Capacity").GetComponent<Text>().text = room.PlayerCount + " / " + room.MaxPlayers;
+            foreach (RoomInfo room in roomList)
+            {
 
-            newRoomButton.GetComponent<Button>().onClick.AddListener(delegate { JoinRoom(newRoomButton.transform); });
+                GameObject newRoomButton = Instantiate(roomBottonPrefab, content) as GameObject;
+                newRoomButton.transform.Find("Name").GetComponent<TMP_Text>().text = room.Name;
+                newRoomButton.transform.Find("Capacity").GetComponent<TMP_Text>().text = room.PlayerCount + " / " + room.MaxPlayers;
+
+                newRoomButton.GetComponent<Button>().onClick.AddListener(delegate { JoinRoom(newRoomButton.transform); });
+            }
+        }catch(Exception e)
+        {
+            Debug.Log(e);
         }
+        
 
         base.OnRoomListUpdate(roomList);
     }
@@ -181,7 +189,8 @@ public class Launcher : MonoBehaviourPunCallbacks
         VerifyUsername();
 
         //Debug.Log("JOIN ROOM @ " + Time.time);
-        string t_roomName = t_button.transform.Find("Name").GetComponent<TextMeshPro>().text;
+        string t_roomName = t_button.transform.Find("Name").GetComponent<TMP_Text>().text;
+        Debug.Log(t_roomName);
         PhotonNetwork.JoinRoom(t_roomName);
     }
 
@@ -191,7 +200,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         {
             if (string.IsNullOrEmpty(usernameField.text))
             {
-                myProfile.username = "RANDOM_USER" + Random.Range(1000, 9999).ToString();
+                myProfile.username = "RANDOM_USER" + UnityEngine.Random.Range(1000, 9999).ToString();
             }
             else
             {
@@ -199,4 +208,5 @@ public class Launcher : MonoBehaviourPunCallbacks
             }
         }
     }
+
 }

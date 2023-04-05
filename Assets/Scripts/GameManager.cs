@@ -195,6 +195,8 @@ public class GameManager : MonoBehaviour, IOnEventCallback
         byte stat = (byte)data[1];
         byte amt = (byte)data[2];
 
+        Debug.Log("CHANGE STATS");
+
         for(int i = 0; i < playerInfo.Count; i++)
         {
             if (playerInfo[i].actor == act)

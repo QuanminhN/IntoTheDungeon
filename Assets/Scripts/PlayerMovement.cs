@@ -309,15 +309,18 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
     #region Public Methods
     public void TakeDamage(int dmg)
     {
+        Debug.Log("ACTOR NUMBER: " + PhotonNetwork.LocalPlayer.ActorNumber);
         if (photonView.IsMine)
         {
+            
             //Deal damage
             Current_health -= dmg;
             //Update Health HUD
             updateHealthBar();
-            //Kill if player has 0 health
+            //Kill if player has less than 0 health
             if (Current_health <= 0)
             {
+                
                 //Destory object
                 PhotonNetwork.Destroy(this.gameObject);
                 //Send to network to update stats
