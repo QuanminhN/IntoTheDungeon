@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
 using UnityEngine.UI;
+using TMPro;
 
 public class PlayerInfo
 {
@@ -39,11 +40,13 @@ public class GameManager : MonoBehaviour, IOnEventCallback
     private Text ui_mykills;
     private Text ui_myDeaths;
     [SerializeField] private GameObject Canvas;
+
+    private Transform ui_leaderboard;
     #endregion
 
     #region Enums
-    public enum EventCodes : byte 
-    { 
+    public enum EventCodes : byte
+    {
         NewPlayer,
         UpdatePlayers,
         ChangeStat,
@@ -69,17 +72,29 @@ public class GameManager : MonoBehaviour, IOnEventCallback
         Spawn();
     }
 
+    private void Update()
+    {
+        if (Input.GetKey(KeyCode.Tab))
+        { 
+            LeaderBoard(ui_leaderboard);
+        }
+        else
+        {
+            if (ui_leaderboard.gameObject.activeSelf) ui_leaderboard.gameObject.SetActive(false);
+        }
+    }
+
     private void InitUI()
     {
         ui_mykills = GameObject.Find("HUD/Kills/Text").GetComponent<Text>();
         ui_myDeaths = GameObject.Find("HUD/Death/Text").GetComponent<Text>();
-
+        ui_leaderboard = GameObject.Find("HUD").transform.Find("Leaderboard").transform;
         RefreshMyStats();
     }
 
     private void RefreshMyStats()
     {
-        if(playerInfo.Count > myId)
+        if (playerInfo.Count > myId)
         {
             ui_mykills.text = $"Kills: {playerInfo[myId].kills}";
             ui_myDeaths.text = $"Deaths: {playerInfo[myId].deaths}";
@@ -88,7 +103,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback
         {
             ui_mykills.text = $"Kills: 0";
             ui_myDeaths.text = $"Deaths: 0";
-        }
+        } 
     }
 
     public void Spawn()
@@ -98,6 +113,73 @@ public class GameManager : MonoBehaviour, IOnEventCallback
         //Instantiate player at that point
         PhotonNetwork.Instantiate(player_prefab_string, t_spawn.position, t_spawn.rotation);
     }
+
+    private void LeaderBoard(Transform t_lb)
+    {
+        //Delete any unneeded object on leaderboard
+        for (int i = 3; i < t_lb.childCount; i++)
+        {
+            Destroy(t_lb.GetChild(i).gameObject);
+        }
+
+        //Set lobby details
+        t_lb.Find("Header/Title").GetComponent<TMP_Text>().text = "Free For All";
+        t_lb.Find("Header/Map").GetComponent<TMP_Text>().text = "MEH";
+
+        //save playercard object
+        GameObject playercard = t_lb.GetChild(2).gameObject; //The playercard will always start at 2
+        playercard.SetActive(false);
+
+        //Sort the leaderboard
+        List<PlayerInfo> sorted = SortPlayer(playerInfo);
+
+        //display the playercards
+        foreach (PlayerInfo p in sorted)
+        {
+            GameObject newCard = Instantiate(playercard, t_lb);
+
+            //Change Username
+            newCard.transform.Find("username").gameObject.transform.GetChild(0).GetComponent<TMP_Text>().text = p.profile.username;
+            //Change kills
+            newCard.transform.Find("Kills").gameObject.transform.GetChild(0).GetComponent<TMP_Text>().text = p.kills.ToString();
+            //Changes deaths
+            newCard.transform.Find("Deaths").gameObject.transform.GetChild(0).GetComponent<TMP_Text>().text = p.deaths.ToString();
+            //Change gold
+            newCard.transform.Find("Gold").gameObject.transform.GetChild(0).GetComponent<TMP_Text>().text = "500";
+
+            newCard.SetActive(true);
+        }
+
+        //Activate leaderboard
+        t_lb.gameObject.SetActive(true);
+    }
+
+    private List<PlayerInfo> SortPlayer(List<PlayerInfo> t_list)
+    {
+        List<PlayerInfo> sorted = new List<PlayerInfo>();
+
+        while(sorted.Count < t_list.Count)
+        {
+            //set default
+            short highest = -1;
+            PlayerInfo selection = t_list[0];
+            foreach(PlayerInfo a in t_list)
+            {
+                if (sorted.Contains(a)) continue;
+                if(a.kills > highest)
+                {
+                    selection = a;
+                    highest = a.kills;
+                }
+            }
+
+            //add Player
+            sorted.Add(selection);
+        }
+
+        return sorted;
+    }
+
 
     #region Photon
     public void OnEvent(EventData photonEvent)
@@ -261,6 +343,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback
                 }
 
                 if (i == myId) RefreshMyStats();
+                if (ui_leaderboard.gameObject.activeSelf) LeaderBoard(ui_leaderboard);
             }
         }
     }
