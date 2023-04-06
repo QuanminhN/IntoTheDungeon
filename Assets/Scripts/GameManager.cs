@@ -25,7 +25,15 @@ public class PlayerInfo
     }
 }
 
-public class GameManager : MonoBehaviour, IOnEventCallback
+public enum GameState
+{
+    Waiting = 0,
+    Starting = 1,
+    Playing = 2,
+    Ending = 3,
+}
+
+public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
     #region Fields
     public GameObject player_prefab;
@@ -39,9 +47,23 @@ public class GameManager : MonoBehaviour, IOnEventCallback
 
     private Text ui_mykills;
     private Text ui_myDeaths;
+    private Text ui_timer;
     [SerializeField] private GameObject Canvas;
 
     private Transform ui_leaderboard;
+    [SerializeField]private Transform ui_endGame;
+
+
+    public int mainMenu = 0; //Keeps track of main menu scene 
+    public int killCount = 3; // How many kills before ending game
+
+    public GameObject mapCam;
+
+    private GameState state = GameState.Waiting;
+
+    private int matchLength = 180;
+    private int currentTime;
+    private Coroutine timerCoroutine;
     #endregion
 
     #region Enums
@@ -50,37 +72,46 @@ public class GameManager : MonoBehaviour, IOnEventCallback
         NewPlayer,
         UpdatePlayers,
         ChangeStat,
+        RefreshTimer,
     }
 
     #endregion
 
-    public void OnEnable()
+    public override void OnEnable()
     {
         PhotonNetwork.AddCallbackTarget(this);
     }
 
-    public void OnDisable()
+    public override void OnDisable()
     {
         PhotonNetwork.RemoveCallbackTarget(this);
     }
 
     private void Start()
     {
+
+        mapCam.SetActive(false);
+
         ValidateConnection();
         InitUI();
+        InitMatchTimer();
+        SetActiveToFalse();
         NewPlayer_S(Launcher.myProfile);
         Spawn();
     }
 
     private void Update()
     {
+        if (state == GameState.Ending) return; //No longer need to keep updating game scene
+
         if (Input.GetKey(KeyCode.Tab))
         { 
             LeaderBoard(ui_leaderboard);
         }
         else
         {
-            if (ui_leaderboard.gameObject.activeSelf) ui_leaderboard.gameObject.SetActive(false);
+            if (ui_leaderboard.gameObject.activeSelf) 
+                ui_leaderboard.gameObject.SetActive(false);
         }
     }
 
@@ -89,7 +120,16 @@ public class GameManager : MonoBehaviour, IOnEventCallback
         ui_mykills = GameObject.Find("HUD/Kills/Text").GetComponent<Text>();
         ui_myDeaths = GameObject.Find("HUD/Death/Text").GetComponent<Text>();
         ui_leaderboard = GameObject.Find("HUD").transform.Find("Leaderboard").transform;
+        ui_endGame = GameObject.Find("EndGame").transform;
+        ui_timer = GameObject.Find("HUD/Timer/Text").GetComponent<Text>();
+
         RefreshMyStats();
+    }
+
+    private void SetActiveToFalse()
+    {
+        ui_leaderboard.gameObject.SetActive(false);
+        ui_endGame.gameObject.SetActive(false);
     }
 
     private void RefreshMyStats()
@@ -104,6 +144,26 @@ public class GameManager : MonoBehaviour, IOnEventCallback
             ui_mykills.text = $"Kills: 0";
             ui_myDeaths.text = $"Deaths: 0";
         } 
+    }
+
+    private void InitMatchTimer()
+    {
+        currentTime = matchLength;
+        RefreshMatchTimer();
+
+        if (PhotonNetwork.IsMasterClient)
+            timerCoroutine = StartCoroutine(timer());
+    }
+
+    private void RefreshMatchTimer()
+    {
+        
+
+        string min = (currentTime / 60).ToString("00");
+        string sec = (currentTime % 60).ToString("00");
+
+        ui_timer.text = min + ":" + sec;
+
     }
 
     public void Spawn()
@@ -203,17 +263,124 @@ public class GameManager : MonoBehaviour, IOnEventCallback
             case EventCodes.ChangeStat:
                 ChangeStat_R(obj);
                 break;
+            case EventCodes.RefreshTimer:
+                RefreshMatchTimer_R(obj);
+                break;
         }
+    }
+
+    public override void OnLeftRoom()
+    {
+        base.OnLeftRoom();
+        SceneManager.LoadScene(mainMenu);
     }
     #endregion
 
     private void ValidateConnection()
     {
         if (PhotonNetwork.IsConnected) return; //Able to connet go to room
-        SceneManager.LoadScene(0); //else return back to main menu
+        else
+            SceneManager.LoadScene(mainMenu); //else return back to main menu
     }
+
+    private void StateCheck()
+    {
+        if(state == GameState.Ending)
+        {
+            EndGame();
+        }
+    }
+
+    private void ScoreCheck()
+    {
+        //Check if winning condition is met
+        bool detectWin = false;
+
+        foreach(PlayerInfo p in playerInfo)
+        {
+            if(p.kills == killCount)
+            {
+                detectWin = true;
+                break;
+            }
+        }
+
+        //Found winner
+        if (detectWin)
+        {
+            //Are we the host ? and the game is still going on
+            if(PhotonNetwork.IsMasterClient && state != GameState.Ending)
+            {
+                //Tell everyone that the game is over
+                UpdatePlayers_S((int)GameState.Ending, playerInfo);
+            }
+        }
+
+    }
+
+    private void EndGame()
+    {
+        //End the game
+        state = GameState.Ending;
+
+        //Stop match timer routine
+        if (timerCoroutine != null) StopCoroutine(timer());
+        currentTime = 0;
+        RefreshMatchTimer();
+
+        //Only the host/master client can do this now
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.DestroyAll();
+            PhotonNetwork.CurrentRoom.IsVisible = false;
+            PhotonNetwork.CurrentRoom.IsOpen = false;
+        }
+
+        //Show map camera
+        mapCam.SetActive(true);
+
+        //Show Leaderboard
+        ui_endGame.gameObject.SetActive(true);
+        LeaderBoard(ui_endGame.Find("Leaderboard"));
+
+        //Wait a bit before returning
+        StartCoroutine(End(6f));
+    }
+
+    #region Coroutine
+    IEnumerator End(float time)
+    {
+        yield return new WaitForSeconds(time);
+
+        PhotonNetwork.AutomaticallySyncScene = false;
+        PhotonNetwork.LeaveRoom();
+
+    }
+
+    IEnumerator timer()
+    {
+        yield return new WaitForSeconds(1);
+
+        currentTime -= 1;
+
+        //Check if timer is finished
+        if (currentTime <= 0)
+        {
+            //game is finished
+            timerCoroutine = null;
+            UpdatePlayers_S((int)GameState.Ending, playerInfo);
+        }
+        else
+        {
+            RefreshMatchTimer_S();
+            timerCoroutine = StartCoroutine(timer());
+        }
+    }
+
+    #endregion
+
     #region Event
-    
+
     public void NewPlayer_S(PlayerData t_data)
     {
         Debug.Log("SENDING NEW PLAYER DATA");
@@ -248,15 +415,18 @@ public class GameManager : MonoBehaviour, IOnEventCallback
 
         playerInfo.Add(p);
 
-        UpdatePlayers_S(playerInfo);
+        UpdatePlayers_S((int)state, playerInfo);
     }
 
-    public void UpdatePlayers_S(List<PlayerInfo> info)
+    public void UpdatePlayers_S(int state, List<PlayerInfo> info)
     {
         Debug.Log("SENDING UPDATE PLAYER DATA");
         //Create package array the size of how many players there are
         //in the room
-        object[] package = new object[info.Count];
+        object[] package = new object[info.Count + 1];
+
+        //This keeps track the state of the game for all players
+        package[0] = state;
 
         for(int i = 0; i < info.Count; i++)
         {
@@ -269,7 +439,7 @@ public class GameManager : MonoBehaviour, IOnEventCallback
              temp_obj[4] = info[i].kills;
              temp_obj[5] = info[i].deaths;
 
-            package[i] = temp_obj;
+            package[i + 1] = temp_obj;
         }
 
         PhotonNetwork.RaiseEvent(
@@ -282,10 +452,13 @@ public class GameManager : MonoBehaviour, IOnEventCallback
 
     public void UpdatePlayers_R(object[] data)
     {
+        state = (GameState)data[0];
+
         Debug.Log("RECIEVING UPDATE PLAYER DATA");
         playerInfo = new List<PlayerInfo>();
 
-        for(int i = 0; i < data.Length; i++)
+        //Start at 1 since 0 is Game State
+        for(int i = 1; i < data.Length; i++)
         {
             object[] temp_data = (object[])data[i];
 
@@ -302,8 +475,10 @@ public class GameManager : MonoBehaviour, IOnEventCallback
 
             playerInfo.Add(p);
 
-            if (PhotonNetwork.LocalPlayer.ActorNumber == p.actor) myId = i;
+            if (PhotonNetwork.LocalPlayer.ActorNumber == p.actor) myId = i - 1;
         }
+        //Now check if anyone meets winning condition
+        StateCheck();
     }
 
     public void ChangeStat_S(int actor, byte stat, byte amt)
@@ -346,6 +521,27 @@ public class GameManager : MonoBehaviour, IOnEventCallback
                 if (ui_leaderboard.gameObject.activeSelf) LeaderBoard(ui_leaderboard);
             }
         }
+        //Check if winning condition is met
+        ScoreCheck();
     }
+
+    public void RefreshMatchTimer_S()
+    {
+        object[] package = new object[] { currentTime };
+
+        PhotonNetwork.RaiseEvent(
+            (byte)EventCodes.RefreshTimer,
+            package,
+            new RaiseEventOptions { Receivers = ReceiverGroup.All },
+            new SendOptions { Reliability = true }
+            );
+    }
+    public void RefreshMatchTimer_R(object[] data)
+    {
+        int t_time = (int)data[0];
+
+        RefreshMatchTimer();
+    }
+
     #endregion
 }

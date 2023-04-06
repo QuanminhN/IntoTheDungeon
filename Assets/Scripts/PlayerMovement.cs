@@ -86,10 +86,6 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
         rb = GetComponent<Rigidbody>();
         WeaponParentCurrentPos = weaponParentOrigin = weaponParent.localPosition;
 
-        //Turn off main camera
-        if(Camera.main)
-            Camera.main.enabled = false;
-
         //See if it is the correct camera
         cameraParent.SetActive(photonView.IsMine);
 
