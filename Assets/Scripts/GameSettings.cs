@@ -12,6 +12,7 @@ public enum GameMode
 public class GameSettings : MonoBehaviour
 {
     public static GameMode gameMode = GameMode.FFA;
+    public static bool isAwayTeam = false;
 }
 
 //This class will hold game setting

@@ -66,6 +66,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     private int matchLength = 180;
     private int currentTime;
     private Coroutine timerCoroutine;
+
+    private bool playerAdded;
     #endregion
 
     #region Enums
@@ -99,7 +101,13 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         InitMatchTimer();
         SetActiveToFalse();
         NewPlayer_S(Launcher.myProfile);
-        Spawn();
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            playerAdded = true;
+            Spawn();
+        }
+        
     }
 
     private void Update()
@@ -383,7 +391,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     private bool CalculateTeam()
     {
-        return false;
+        return PhotonNetwork.CurrentRoom.PlayerCount % 2 == 0;
     }
 
     #endregion
@@ -426,6 +434,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
         playerInfo.Add(p);
 
+        //resync information when new player joins
+        foreach(GameObject obj in GameObject.FindGameObjectsWithTag("Player"))
+        {
+            obj.GetComponent<PlayerMovement>().TrySync();
+        }
+
         UpdatePlayers_S((int)state, playerInfo);
     }
 
@@ -466,6 +480,16 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         state = (GameState)data[0];
 
+        //There has been a new Player
+        if(playerInfo.Count < data.Length - 1)
+        {
+            //So update infos
+            foreach(GameObject obj in GameObject.FindGameObjectsWithTag("Player"))
+            {
+                obj.GetComponent<PlayerMovement>().TrySync();
+            }
+        }
+
         Debug.Log("RECIEVING UPDATE PLAYER DATA");
         playerInfo = new List<PlayerInfo>();
 
@@ -488,7 +512,18 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
             playerInfo.Add(p);
 
-            if (PhotonNetwork.LocalPlayer.ActorNumber == p.actor) myId = i - 1;
+            if (PhotonNetwork.LocalPlayer.ActorNumber == p.actor)
+            {
+                myId = i - 1;
+
+                //if we have been waiting to be added to the game, then spawn in
+                if (!playerAdded)
+                {
+                    playerAdded = true;
+                    GameSettings.isAwayTeam = p.awayTeam;
+                    Spawn();
+                }
+            }
         }
         //Now check if anyone meets winning condition
         StateCheck();

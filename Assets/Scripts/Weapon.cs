@@ -195,7 +195,24 @@ public class Weapon : MonoBehaviourPunCallbacks
                     //Shooing other players
                     if (t_hit.collider.gameObject.layer == 9)
                     {
-                        t_hit.collider.transform.root.gameObject.GetPhotonView().RPC("TakeDamage", RpcTarget.All, loadout[currentIndex].damage, PhotonNetwork.LocalPlayer.ActorNumber);
+                        bool doDamage = false;
+
+                        //Always do damage to other players
+                        if (GameSettings.gameMode == GameMode.FFA)
+                            doDamage = true;
+
+                        //Check if target is enemy team
+                        if(GameSettings.gameMode == GameMode.TDM)
+                        {
+                                        //Check team                                                        vs      Local aka our team
+                            if (t_hit.collider.transform.root.gameObject.GetComponent<PlayerInfo>().awayTeam != GameSettings.isAwayTeam)
+                                doDamage = true;
+                        }
+
+                        if (doDamage)
+                        {
+                            t_hit.collider.transform.root.gameObject.GetPhotonView().RPC("TakeDamage", RpcTarget.All, loadout[currentIndex].damage, PhotonNetwork.LocalPlayer.ActorNumber);
+                        }
                     }
                 }
             }

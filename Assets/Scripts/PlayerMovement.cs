@@ -52,6 +52,7 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
     private Transform ui_healthBar;
     private Text ui_ammo;
     private Text ui_username;
+    private Text ui_team;
 
     //Crouching
     public float crouchModifer;
@@ -66,6 +67,11 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
 
     [HideInInspector]public PlayerData playerProfile;
     public TextMeshPro playerUsername;
+
+    public bool awayTeam;
+
+    public Renderer[] teamIndicators;
+    
     #endregion
 
     #region Monobehavior Callbacks
@@ -95,11 +101,33 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
             ui_healthBar = GameObject.Find("HUD/Health/Bar").transform;
             ui_ammo = GameObject.Find("HUD/Ammo/Text").GetComponent<Text>();
             ui_username = GameObject.Find("HUD/Username/Text").GetComponent<Text>();
+            ui_team = GameObject.Find("HUD/Team/Text").GetComponent<Text>();
             Current_health = Max_health;
             baseFOV = normalCam.fieldOfView;
             ui_username.text = Launcher.myProfile.username;
             updateHealthBar();
             photonView.RPC("SyncUserProfile", RpcTarget.All, Launcher.myProfile.username, Launcher.myProfile.level, Launcher.myProfile.xp);
+
+            if(GameSettings.gameMode == GameMode.TDM)
+            {
+                photonView.RPC("SyncTeam", RpcTarget.All, GameSettings.isAwayTeam);
+
+                if (GameSettings.isAwayTeam)
+                {
+                    ui_team.text = "Red Team";
+                    ui_team.color = Color.red;
+                }
+                else
+                {
+                    ui_team.text = "Blue Team";
+                    ui_team.color = Color.blue;
+                }
+
+            }
+            else
+            {
+                ui_team.gameObject.SetActive(false);
+            }
         }
     }
 
@@ -299,6 +327,38 @@ public class PlayerMovement : MonoBehaviourPunCallbacks, IPunObservable
     {
         playerProfile = new PlayerData(t_username, t_level, t_xp);
         playerUsername.text = playerProfile.username;
+    }
+
+    [PunRPC]
+    void SyncTeam(bool t_awayTeam)
+    {
+        awayTeam = t_awayTeam;
+        if (awayTeam)
+        {
+            ColorTeamIndicator(Color.red);
+        }
+        else
+        {
+            ColorTeamIndicator(Color.blue);
+        }
+    }
+    private void ColorTeamIndicator(Color t_color)
+    {
+        foreach(Renderer render in teamIndicators)
+        {
+            render.material.color = t_color;
+        }
+    }
+
+    public void TrySync()
+    {
+        if (!photonView.IsMine) return;
+        photonView.RPC("SyncProfile", RpcTarget.All, Launcher.myProfile.username, Launcher.myProfile.level, Launcher.myProfile.xp);
+
+        if(GameSettings.gameMode == GameMode.TDM)
+        {
+            photonView.RPC("SyncTeam", RpcTarget.All, GameSettings.isAwayTeam);
+        }
     }
     #endregion
 
