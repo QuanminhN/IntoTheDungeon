@@ -15,13 +15,15 @@ public class PlayerInfo
     public int actor;
     public short kills;
     public short deaths;
+    public bool awayTeam; //Change this to like CT/T etc;
 
-    public PlayerInfo(PlayerData t_profile, int t_act, short t_kills, short t_deaths)
+    public PlayerInfo(PlayerData t_profile, int t_act, short t_kills, short t_deaths, bool t_team)
     {
         profile = t_profile;
         actor = t_act;
         kills = t_kills;
         deaths = t_deaths;
+        awayTeam = t_team;
     }
 }
 
@@ -43,7 +45,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     public List<PlayerInfo> playerInfo = new List<PlayerInfo>();
     public int myId;
 
-    private int numOfFields = 6;
+    private int numOfFields = 7;
 
     private Text ui_mykills;
     private Text ui_myDeaths;
@@ -183,8 +185,10 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         }
 
         //Set lobby details
-        t_lb.Find("Header/Title").GetComponent<TMP_Text>().text = "Free For All";
+        t_lb.Find("Header/Title").GetComponent<TMP_Text>().text = System.Enum.GetName(typeof(GameMode), GameSettings.gameMode);
+        //t_lb.Find("Header/Map").GetComponent<TMP_Text>().text = SceneManager.GetActiveScene().name;
         t_lb.Find("Header/Map").GetComponent<TMP_Text>().text = "MEH";
+
 
         //save playercard object
         GameObject playercard = t_lb.GetChild(2).gameObject; //The playercard will always start at 2
@@ -377,6 +381,11 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         }
     }
 
+    private bool CalculateTeam()
+    {
+        return false;
+    }
+
     #endregion
 
     #region Event
@@ -394,6 +403,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         //This is where we can set the base number such as gold, and KDA for new players
         package[4] = (short)0;
         package[5] = (short)0;
+        package[6] = CalculateTeam();
 
         PhotonNetwork.RaiseEvent(
             (byte)EventCodes.NewPlayer,
@@ -410,7 +420,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             new PlayerData((string)t_data[0], (int)t_data[1], (int)t_data[2]),
             (int)t_data[3],
             (short)t_data[4],
-            (short)t_data[5]
+            (short)t_data[5],
+            (bool)t_data[6]
         );
 
         playerInfo.Add(p);
@@ -438,6 +449,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
              temp_obj[3] = info[i].actor;
              temp_obj[4] = info[i].kills;
              temp_obj[5] = info[i].deaths;
+             temp_obj[6] = info[i].awayTeam;
 
             package[i + 1] = temp_obj;
         }
@@ -470,7 +482,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
                     ),
                 (int)temp_data[3],
                 (short)temp_data[4],
-                (short)temp_data[5]
+                (short)temp_data[5],
+                (bool)temp_data[6]
                 );
 
             playerInfo.Add(p);

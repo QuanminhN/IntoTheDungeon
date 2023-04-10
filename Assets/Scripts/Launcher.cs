@@ -46,6 +46,8 @@ public class Launcher : MonoBehaviourPunCallbacks
     public TMP_Text maxPlayerValue;
 
     private List<RoomInfo> roomList;
+
+    public TMP_Text modeValue;
     public void Awake()
     {
         PhotonNetwork.AutomaticallySyncScene = true; // Sync all clients to the host/master scene
@@ -83,8 +85,11 @@ public class Launcher : MonoBehaviourPunCallbacks
         RoomOptions options = new RoomOptions(); //Used to set room settings
         options.MaxPlayers = (byte)maxPlayersSlider.value;
 
+        options.CustomRoomPropertiesForLobby = new string[] { "map", "mode" };
+
         ExitGames.Client.Photon.Hashtable properties = new ExitGames.Client.Photon.Hashtable();
         properties.Add("Map", 0);
+        properties.Add("Mode", (int)GameSettings.gameMode);
         options.CustomRoomProperties = properties;
 
         PhotonNetwork.CreateRoom(roomNameField.text, options);
@@ -93,6 +98,18 @@ public class Launcher : MonoBehaviourPunCallbacks
     public void ChangeMap()
     {
 
+    }
+
+    public void ChangeMode()
+    {
+        //Increment the gamemode
+        int newMode = (int)GameSettings.gameMode + 1;
+        //ensure int never leaves bound
+        if (newMode >= System.Enum.GetValues(typeof(GameMode)).Length) newMode = 0;
+        //Set the new game mode
+        GameSettings.gameMode = (GameMode)newMode;
+        //Out put it to the screen
+        modeValue.text = "MODE: " + System.Enum.GetName(typeof(GameMode), newMode);
     }
 
     public void ChangeMaxPlayerSlider(float t_val)
@@ -145,6 +162,17 @@ public class Launcher : MonoBehaviourPunCallbacks
     {
         TabCloseAll();
         createTab.SetActive(true);
+
+        roomNameField.text = "";
+
+
+        //Init default settings
+        //currentmap = 0;
+        //mapValue.text = "MAP: " + maxPlayersSlider[currentmap].name.ToUpper();
+
+        GameSettings.gameMode = (GameMode)0;
+        modeValue.text = "MODE: " + System.Enum.GetName(typeof(GameMode), (GameMode)0);
+
     }
 
     private void ClearRoomList()
@@ -191,7 +219,29 @@ public class Launcher : MonoBehaviourPunCallbacks
         //Debug.Log("JOIN ROOM @ " + Time.time);
         string t_roomName = t_button.transform.Find("Name").GetComponent<TMP_Text>().text;
         Debug.Log(t_roomName);
-        PhotonNetwork.JoinRoom(t_roomName);
+
+        RoomInfo roomInfo = null;
+        Transform buttonParent = t_button.parent;
+        for(int i = 0; i < buttonParent.childCount; i++)
+        {
+            if (buttonParent.GetChild(i).Equals(t_button))
+            {
+                roomInfo = roomList[i];
+                break;
+            }
+        }
+        if(roomInfo != null)
+        {
+            LoadGameSettings(roomInfo);
+            PhotonNetwork.JoinRoom(t_roomName);
+        }
+
+        
+    }
+
+    public void LoadGameSettings(RoomInfo roomInfo)
+    {
+        GameSettings.gameMode = (GameMode)roomInfo.CustomProperties["mode"];
     }
 
     private void VerifyUsername()
