@@ -50,6 +50,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     public TMP_Text modeValue;
     public void Awake()
     {
+        Debug.Log("AWAKE");
         PhotonNetwork.AutomaticallySyncScene = true; // Sync all clients to the host/master scene
 
         myProfile = Data.LoadProfile();
